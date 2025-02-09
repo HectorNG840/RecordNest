@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}RecordNest{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 <body>
@@ -12,9 +13,16 @@
         <h1>RecordNest</h1>
         <nav>
             <ul>
-                <li><a href="">Home</a></li>
+                <li><a href="{% url 'index' %}">Home</a></li>
                 <li><a href="">About</a></li>
                 <li><a href="">Contact</a></li>
+                <li><a href="">Collections</a></li>
+                <li><a href="">Login</a></li>
+                <li><a href="">Sign Up</a></li>
+                <form class="search-container" action="{% url 'search' %}" method="get">
+                    <input type="text" name="q" placeholder="Search..">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </div>
             </ul>
         </nav>
     </header>
@@ -22,8 +30,5 @@
         {% block content %}
         {% endblock %}
     </main>
-    <footer>
-        <p>&copy; 2025 RecordNest. All rights reserved.</p>
-    </footer>
 </body>
 </html>

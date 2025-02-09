@@ -1,3 +1,4 @@
 Django
 pytest-django
 Pillow
+discog-client
