@@ -1,0 +1,41 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Record Details{% endblock %}
+
+{% block content %}
+    <h2>{{ record.title }}</h2>
+    
+    {% if record.image_url %}
+        <img src="{{ record.image_url }}" alt="Image">
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
+    
+    <p><strong>Artists:</strong> {{ record.artists }}</p>
+    <p><strong>Year:</strong> {{ record.year }}</p>
+    <p><strong>Average Rating:</strong> {{ record.avg_rating }}</p>
+    <p><strong>Released:</strong> {{ record.released }}</p>
+    <p><strong>Notes:</strong> {{ record.notes }}</p>
+    <p><strong>Barcode:</strong> {{ record.barcode }}</p>
+    <p><strong>Tags:</strong> {{ record.tags }}</p>
+    
+    <p><strong>Genres:</strong> {{ record.genres }}</p>
+    <p><strong>Styles:</strong> {{ record.styles }}</p>
+    <p><strong>Labels:</strong> {{ record.labels }}</p>
+    <p><strong>Formats:</strong> {{ record.formats }}</p>
+
+    <h3>Tracklist</h3>
+    {% if record.tracklist %}
+        <ul>
+            {% for track in record.tracklist %}
+                <li>
+                    <strong>{{ track.position }}</strong> - {{ track.title }} ({{ track.duration }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tracklist available</p>
+    {% endif %}
+
+
+{% endblock %}

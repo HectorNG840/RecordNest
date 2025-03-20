@@ -9,11 +9,14 @@
         <div class="grid-container">
             {% for record in page_obj %}
                 <div class="grid-item">
-                    {% if record.image_url %}
-                        <img src="{{ record.image_url }}" alt="Image">
-                    {% else %}
-                        <p>No image available</p>
-                    {% endif %}
+                    <a href="{% url 'record_detail' %}?title={{ record.title|urlencode }}&artists={{ record.artists|urlencode }}&image_url={{ record.image_url|urlencode }}&year={{ record.year|urlencode }}&avg_rating={{ record.avg_rating|urlencode }}&released={{ record.released|urlencode }}&notes={{ record.notes|urlencode }}&barcode={{ record.barcode|urlencode }}&tags={{ record.tags|urlencode }}&genres={{ record.genres|urlencode }}&styles={{ record.styles|urlencode }}&labels={{ record.labels|urlencode }}&formats={{ record.formats|urlencode }}&tracklist={{ record.tracklist|safe|urlencode }}">
+
+                        {% if record.image_url %}
+                            <img src="{{ record.image_url }}" alt="Image">
+                        {% else %}
+                            <p>No image available</p>
+                        {% endif %}
+                    </a>
                     <p>{{ record.title }}</p>
                     <p class="artists">{{ record.artists }}</p>
                 </div>

@@ -56,17 +56,17 @@ nav ul li a:hover {
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columnas */
-    grid-template-rows: repeat(2, auto); /* 2 filas */
-    gap: 20px; /* Espacio entre los elementos */
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 20px;
     justify-content: center;
     align-items: center;
-    max-width: 80%;
+    max-width: 95%;
     margin: 0 auto;
 }
 
 .grid-item {
-    background-color: #f8f8f8; /* Fondo opcional */
+    background-color: #484d47;
     padding: 10px;
     text-align: center;
     border-radius: 8px;
@@ -74,9 +74,12 @@ nav ul li a:hover {
 }
 
 .grid-item img {
-    max-width: 100%;
+    max-width: 40%;
     height: auto;
     border-radius: 5px;
+    float: left;
+    margin-right: 10px;
+    margin-left: 5px;
 }
 
 .artists {
