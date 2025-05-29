@@ -1,56 +1,60 @@
 {% extends 'main/base.html' %}
 {% load custom_filters %}
+{% load static %}
 
-{% block title %}Search Results{% endblock %}
+{% block title %}Resultados de búsqueda para "{{ query }}"{% endblock %}
 
 {% block content %}
-    <h2>Search Results for "{{ query }}"</h2>
-    {% if page_obj %}
-        <div class="grid-container">
-            {% for record in page_obj %}
-                <div class="grid-item">
-                    {% if record.image_url %}
-                        <img src="{{ record.image_url }}" alt="Image">
-                    {% else %}
-                        <p>No image available</p>
-                    {% endif %}
-                    <p>{{ record.title }}</p>
-                    <p class="artists">{{ record.artists }}</p>
-                </div>
-            {% endfor %}
-        </div>
+<link rel="stylesheet" href="{% static 'css/search.css' %}">
 
-        <!-- Paginación -->
-        <div class="pagination">
-            <span class="step-links">
-                {% if total_pages > 1 %}
-                    {% if current_page > 1 %}
-                        <a href="?q={{ query }}&page=1">&laquo; First</a>
-                        <a href="?q={{ query }}&page={{ current_page|add:"-1" }}">Previous</a>
-                    {% else %}
-                        <span class="disabled">&laquo; First</span>
-                        <span class="disabled">Previous</span>
-                    {% endif %}
+<section class="search-section">
+  <h2 class="search-title">Resultados para: "{{ query }}"</h2>
 
-                    <span class="current">
-                        Page {{ current_page }} of {{ total_pages }}.
-                    </span>
+  {% if results %}
+  <div class="grid-container">
+    {% for result in results %}
+      {% if result.type == "master" %}
+        <a href="{% url 'record_detail' %}?title={{ result.title|urlencode }}&artists={{ result.artists|urlencode }}" class="card-link">
+          <div class="card master-card">
+            <div class="image-container" style="background-image: url('{{ result.image_url }}');"></div>
+            <div class="card-body">
+              <h3 class="card-title">{{ result.title }}</h3>
+              <p><strong>Artista:</strong> {{ result.artists }}</p>
+              <p><strong>Año:</strong> {{ result.year|default:"Desconocido" }}</p>
+              <p><strong>Géneros:</strong> {{ result.genres|default:"Desconocidos" }}</p>
+              <p><strong>Estilos:</strong> {{ result.styles|default:"Desconocidos" }}</p>
+            </div>
+          </div>
+        </a>
+      {% elif result.type == "artist" %}
+        <a href="{% url 'artists:artist_detail' %}?name={{ result.name|urlencode }}" class="card-link">
+          <div class="card artist-card">
+            <div class="image-container" style="background-image: url('{{ result.image_url }}');"></div>
+            <div class="card-body">
+              <h3 class="card-title">{{ result.name }}</h3>
+              <p class="type-label">Tipo: Artista</p>
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
 
-                    {% if current_page < total_pages %}
-                        <a href="?q={{ query }}&page={{ current_page|add:"1" }}">Next</a>
-                        <a href="?q={{ query }}&page={{ total_pages }}">Last &raquo;</a>
-                    {% else %}
-                        <span class="disabled">Next</span>
-                        <span class="disabled">Last &raquo;</span>
-                    {% endif %}
-                {% endif %}
-            </span>
-        </div>
-
-
-
-
-    {% else %}
-        <p>No results found.</p>
-    {% endif %}
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% for page in current_page|smart_range:total_pages %}
+      {% if page == "..." %}
+        <span class="ellipsis">…</span>
+      {% elif page == current_page %}
+        <span class="current">{{ page }}</span>
+      {% else %}
+        <a href="?q={{ query }}&type={{ type }}&page={{ page }}">{{ page }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% else %}
+    <p class="no-results">No se encontraron resultados para tu búsqueda.</p>
+  {% endif %}
+</section>
 {% endblock %}

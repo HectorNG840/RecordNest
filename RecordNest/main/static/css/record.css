@@ -1,0 +1,273 @@
+body {
+  background-color: #1b1b1b;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.record-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* TÍTULOS */
+.record-container h1, .record-container h3 {
+  color: #aed6b2;
+  margin-top: 2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #aed6b2;
+  display: inline-block;
+}
+
+/* INFO PRINCIPAL (PORTADA + DETALLES) */
+.record-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* CARRUSEL DE IMÁGENES */
+.image-carousel {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(0,0,0,0.5);
+  background: #2a2a2a;
+}
+
+.image-carousel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* FLECHAS DE CARRUSEL */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  background-color: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 0.6rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transform: translateY(-50%);
+  z-index: 1;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.carousel-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.prev-btn { left: 10px; }
+.next-btn { right: 10px; }
+
+/* INFO DISCO */
+.record-info p {
+  margin: 0.4rem 0;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
+.record-info p strong {
+  color: #fff;
+}
+
+/* TRACKLIST */
+.spotify-tracklist {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.spotify-track {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px #000;
+  flex-wrap: wrap;
+}
+
+/* TRACK LEFT */
+.track-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.track-number {
+  font-size: 1rem;
+  color: #aed6b2;
+  min-width: 30px;
+  text-align: right;
+}
+
+.track-title {
+  font-weight: bold;
+  color: #fff;
+}
+
+.track-artist {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* TRACK RIGHT */
+.track-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.track-duration {
+  color: #999;
+}
+
+/* REPRODUCTOR */
+.custom-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #1e1e1e;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+  width: 280px;
+}
+
+.custom-player .play-btn {
+  background-color: #aed6b2;
+  border: none;
+  color: #111;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.custom-player .play-btn:hover {
+  background-color: #8bcba0;
+}
+
+.custom-player .progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.custom-player .progress {
+  height: 100%;
+  width: 0%;
+  background-color: #aed6b2;
+  transition: width 0.2s;
+}
+
+/* BOTÓN DE DEEZER */
+.deezer-btn {
+  background-color: #aed6b2;
+  color: #111;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.deezer-btn:hover {
+  background-color: #8bcba0;
+}
+
+.no-preview {
+  color: #777;
+  font-size: 1.2rem;
+}
+
+/* VERSIONES DISPONIBLES */
+.versions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.version-card-link {
+  text-decoration: none;
+}
+
+.version-card {
+  background-color: #2a2a2a;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 5px #000;
+  transition: transform 0.2s ease-in-out;
+  color: #ccc;
+}
+
+.version-card:hover {
+  transform: translateY(-5px);
+  background-color: #3a3a3a;
+  color: #fff;
+}
+
+/* BOTÓN CARGAR MÁS */
+#load-more {
+  margin: 2rem auto 1rem auto;
+  display: block;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background: #aed6b2;
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#load-more:hover {
+  background: #8bcba0;
+}
+
+/* SPINNER */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #aed6b2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 1rem auto 0 auto;
+  padding: 0;
+}
+
+#masterId {
+  display: none !important;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

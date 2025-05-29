@@ -1,0 +1,185 @@
+body {
+  background-color: #1b1b1b;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* CONTENEDOR */
+.record-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* CABECERA DEL ARTISTA */
+.artist-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  align-items: center;
+}
+
+.artist-photo {
+  max-width: 320px;
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(0,0,0,0.5);
+}
+
+.artist-info {
+  flex: 1;
+}
+
+.artist-info h1 {
+  font-size: 2.2rem;
+  color: #aed6b2;
+  padding-bottom: 0.4rem;
+  margin: 0 0 1rem 0;
+  border-bottom: 2px solid #aed6b2;
+}
+
+.artist-info p {
+  color: #ccc;
+  line-height: 1.6;
+  font-size: 1rem;
+  max-width: 800px;
+}
+
+/* SELECTOR DE MODO (tabs) */
+.mode-toggle {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem auto 1.5rem auto;
+  justify-content: center;
+}
+
+.mode-toggle a {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #aed6b2;
+  background-color: #2a2a2a;
+  transition: background-color 0.2s ease;
+}
+
+.mode-toggle a:hover {
+  background-color: #3a3a3a;
+}
+
+.mode-toggle a.active {
+  background-color: #aed6b2;
+  color: #111;
+}
+
+/* TÍTULO SECCIÓN */
+h2 {
+  font-size: 1.8rem;
+  color: #aed6b2;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* TARJETAS DE DISCO */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* CARD */
+.card {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  text-align: left;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  background-color: #3a3a3a;
+}
+
+.image-container {
+  height: 220px;
+  background-color: #2a2a2a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  margin-top: 20px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.image-container img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+  color: #aed6b2;
+}
+
+.card-body p {
+  color: #ccc;
+  font-size: 0.95rem;
+  margin: 0.2rem 0;
+}
+
+.card-body p strong {
+  color: #fff;
+}
+
+/* LINK DE LA CARD */
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.card-link:hover {
+  text-decoration: none;
+}
+
+/* PAGINACIÓN */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.pagination a {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background-color: #333;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.pagination a:hover {
+  background-color: #444;
+}
+
+.pagination span {
+  color: #bbb;
+}
