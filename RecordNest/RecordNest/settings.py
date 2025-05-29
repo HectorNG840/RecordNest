@@ -28,6 +28,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DISCOGS_CONSUMER_KEY = 'RGqvUKwokTQuBwTPXLHE'
+DISCOGS_CONSUMER_SECRET = 'AtLdLqCHnURhKdnnPxxsvEOvhfPGpTUj'
+DISCOGS_OAUTH_TOKEN = 'JgYWEuHzIZachQwTUEkdeVTYUqtgfkrdBZjlBKBP' 
+DISCOGS_OAUTH_SECRET = 'KyPcZzpWvjDvhKtXYFzQqwoaIuWCtdmMOMHhLfDd'
+DISCOGS_CALLBACK_URL = 'http://127.0.0.1:8000/discogs/callback/'
+
 
 # Application definition
 
@@ -41,6 +47,7 @@ INSTALLED_APPS = [
     'main',
     'users',
     'records',
+    'artists',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
 ]
 
 ROOT_URLCONF = 'RecordNest.urls'
@@ -103,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -125,3 +134,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = "index"
+LOGOUT_REDIRECT_URL = "index"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'recordnest.app@gmail.com'
+EMAIL_HOST_PASSWORD = 'orpn gdbk eyad smcn '
+DEFAULT_FROM_EMAIL = 'RecordNest <recordnest.app@gmail.com>'
+

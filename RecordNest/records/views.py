@@ -6,31 +6,73 @@ from .models import Record
 import hashlib
 import discogs_client
 import json
+from django.conf import settings
+from .deezer_utils import get_preview_url_from_deezer, get_deezer_results, normalize_name
+from django.http import HttpResponse
+from django.http import JsonResponse
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from requests_oauthlib import OAuth1Session
+from django.conf import settings
+from math import ceil
+import time
 
-d = discogs_client.Client(
-    'RecordNest/0.1',
-    user_token='evTZafZyPDstFshQJVwKuGfBhcrbjGgXzYBJdMWl'
-)
+
+def get_oauth_session():
+    return OAuth1Session(
+        settings.DISCOGS_CONSUMER_KEY,
+        client_secret=settings.DISCOGS_CONSUMER_SECRET,
+        resource_owner_key=settings.DISCOGS_OAUTH_TOKEN,
+        resource_owner_secret=settings.DISCOGS_OAUTH_SECRET
+    )
 
 
-def search(request):
-    query = request.GET.get("q", "").strip()
+def get_discogs_client():
+    return discogs_client.Client(
+        'RecordNest/1.0',
+        consumer_key=settings.DISCOGS_CONSUMER_KEY,
+        consumer_secret=settings.DISCOGS_CONSUMER_SECRET,
+        token=settings.DISCOGS_OAUTH_TOKEN,
+        secret=settings.DISCOGS_OAUTH_SECRET
+    )
+
+def search_discogs(query, page=1):
+    session = get_oauth_session()
+    url = f"https://api.discogs.com/database/search"
+    params = {
+        "q": query,
+        "page": page,
+        "per_page": 6
+    }
+    response = session.get(url, params=params)
+    return response.json()
+
+def fetch_artist_detail(result):
+    artist_id = result.get("id")
+    name = result.get("title", "Desconocido")
+    image_url = result.get("thumb")
 
     try:
-        page_number = int(request.GET.get('page', 1))
-        if page_number < 1:
-            page_number = 1
-    except ValueError:
-        page_number = 1
+        session = get_oauth_session()
+        detail_url = f"https://api.discogs.com/artists/{artist_id}"
+        detail = session.get(detail_url).json()
+        images = detail.get("images", [])
+        if images:
+            image_url = images[0].get("uri", image_url)
+    except:
+        pass
 
-    print(f"📄 Página solicitada: {page_number}")
-
-    cache_key = f"search_{hashlib.md5(query.encode()).hexdigest()}_page_{page_number}"
-    cached_data = cache.get(cache_key)
-
-    if cached_data:
-        print(f"⚡ Cargando desde caché: {cache_key}")
-        return render(request, 'records/search.html', cached_data)
+    return {
+            "type": "artist",
+            "name": name,
+            "image_url": image_url,
+        }
+    
+def search(request):
+    query = request.GET.get("q", "").strip()
+    search_type = request.GET.get("type", "master")
+    page_number = int(request.GET.get("page", 1) or 1)
+    per_page = 8
 
     if not query:
         return render(request, 'records/search.html', {
@@ -39,128 +81,269 @@ def search(request):
         })
 
     try:
-        results = d.search(query, type="master", per_page=6, page=page_number)
-        total_pages = results.pages
-        print(f"📄 Total de páginas disponibles según Discogs: {total_pages}")
+        session = get_oauth_session()
+        url = "https://api.discogs.com/database/search"
+        params = {
+            "q": query,
+            "type": search_type,
+            "page": page_number,
+            "per_page": per_page
+        }
 
-        results_page = results.page(page_number)
+        response = session.get(url, params=params)
+        data = response.json()
+        results = data.get("results", [])
+        total_pages = data.get("pagination", {}).get("pages", 1)
+        if not results and total_pages > 1:
+            time.sleep(0.6)  # darle tiempo al servidor
+            response = session.get(url, params=params)
+            data = response.json()
+            results = data.get("results", [])
+
+        artist_results = [r for r in results if r.get("type") == "artist"]
+        master_results = [r for r in results if r.get("type") == "master"]
         processed_results = []
 
-        for record in results_page:
-            try:
-                main_release = None
-                if hasattr(record, 'main_release') and record.main_release:
-                    main_release = record.main_release
-                    main_release.refresh()
 
-                    print("_________________________________________________")
-                    if "tracklist" in main_release.data:
-                        print("✅ Tracklist encontrado:")
-                        print(json.dumps(main_release.data["tracklist"], indent=4))
-                    else:
-                        print("❌ Tracklist NO encontrado en main_release.data")
 
-                first_image_url = None
-                if main_release and hasattr(main_release, 'images') and main_release.images:
-                    first_image_url = main_release.images[0]['uri']
-                
-                artists = ', '.join(
-                    artist.name for artist in getattr(main_release, 'artists', [])
-                ) if main_release and hasattr(main_release, 'artists') else "Desconocido"
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            artist_items = list(executor.map(fetch_artist_detail, artist_results[:8]))
 
-                processed_results.append({
-                    'image_url': first_image_url,
-                    'title': main_release.title if main_release else record.title,
-                    'artists': artists,
-                    'year': main_release.year if main_release else record.year,
-                    'avg_rating': main_release.data.get("community", {}).get("rating", {}).get("average", "N/A") if main_release else "N/A",
-                    'released': main_release.data.get("released", 'Desconocido') if main_release else 'Desconocido',
-                    'notes': main_release.notes if main_release and hasattr(main_release, 'notes') else 'No notes available',
-                    'barcode': ', '.join(main_release.barcode) if main_release and hasattr(main_release, 'barcode') else 'No barcode available',
-                    'tags': ', '.join(main_release.tags) if main_release and hasattr(main_release, 'tags') else 'No tags',
-                    'genres': ', '.join(main_release.genres) if main_release and hasattr(main_release, 'genres') else "Desconocido",
-                    'styles': ', '.join(main_release.styles) if main_release and hasattr(main_release, 'styles') else "Desconocido",
-                    'labels': ', '.join(label.name for label in getattr(main_release, 'labels', [])) if main_release and hasattr(main_release, 'labels') else "Desconocido",
-                    'formats': ', '.join(fmt['name'] for fmt in getattr(main_release, 'formats', [])) if main_release and hasattr(main_release, 'formats') else "Desconocido",
-                    'tracklist': json.dumps([
-                        {
-                            'position': track.get("position", "N/A"),
-                            'title': track.get("title", "Unknown Title"),
-                            'duration': track.get("duration", "N/A")
-                        } for track in main_release.data.get("tracklist", [])
-                    ], ensure_ascii=False) if main_release else "[]"
+        processed_results.extend(artist_items)
 
-                })
-            except Exception as e:
-                print(f"⚠️ Error al procesar un resultado ({record.title}): {type(e).__name__} - {e}")
+        # MASTERS
+        for result in master_results:
+            title = result.get("title", "Desconocido")
+            if " - " in title:
+                artist_name, record_title = title.split(" - ", 1)
+            else:
+                artist_name, record_title = "Desconocido", title
 
-        print(f"✅ Total de resultados en la página {page_number}: {len(processed_results)}")
+            processed_results.append({
+                "type": "master",
+                "image_url": result.get("cover_image"),
+                "title": record_title.strip(),
+                "year": result.get("year", "Desconocido"),
+                "genres": ', '.join(result.get("genre", [])),
+                "styles": ', '.join(result.get("style", [])),
+                "labels": ', '.join(result.get("label", [])),
+                "formats": ', '.join(result.get("format", [])),
+                "master_id": result.get("master_id"),
+                "artists": artist_name.strip(),
+            })
 
-        paginator = Paginator(processed_results, 6)
-        page_obj = paginator.get_page(page_number)
-
-        print(f"🔍 Parámetros GET: {request.GET}")
-
-        cached_data = {
+        context = {
             'query': query,
-            'page_obj': page_obj,
+            'type': search_type,
+            'results': processed_results,
             'total_pages': total_pages,
             'current_page': page_number
         }
-        cache.set(cache_key, cached_data, timeout=600)
 
-        return render(request, 'records/search.html', cached_data)
+        return render(request, 'records/search.html', context)
 
     except Exception as e:
-        print(f"❌ Error general en la búsqueda: {type(e).__name__} - {e}")
+        print(f"❌ Error global en search: {e}")
         return render(request, 'records/search.html', {
             'error': f"Error en la búsqueda: {str(e)}",
             'query': query
         })
 
 
+
+
+
 def record_detail(request):
-    title = request.GET.get('title', 'Unknown Title')
-    artists = request.GET.get('artists', 'Unknown Artist')
-    image_url = request.GET.get('image_url', '')
-    year = request.GET.get('year', 'Unknown Year')
-    avg_rating = request.GET.get('avg_rating', 'N/A')
-    released = request.GET.get('released', 'Desconocido')
-    notes = request.GET.get('notes', 'No notes available')
-    barcode = request.GET.get('barcode', 'No barcode available')
-    tags = request.GET.get('tags', 'No tags')
-    genres = request.GET.get('genres', 'Unknown Genre')
-    styles = request.GET.get('styles', 'Unknown Style')
-    labels = request.GET.get('labels', 'Unknown Label')
-    formats = request.GET.get('formats', 'Unknown Format')
+    master_id = request.GET.get("master_id")
+    release_id = request.GET.get("release_id")
+    title = request.GET.get('title', '').strip()
+    artists_param = request.GET.get('artists', '').strip()
 
-    tracklist_json = request.GET.get('tracklist', '[]')
-
-    print(f"📥 Tracklist recibido en la URL: {tracklist_json}")
+    clean_artist = re.sub(r'\s*\(\d+\)$', '', artists_param) if artists_param else None
+    session = get_oauth_session()
 
     try:
-        decoded_tracklist = unquote(tracklist_json)  # Decodifica caracteres especiales
-        print(f"✅ Tracklist decodificado de la URL: {decoded_tracklist}")  # Verificar antes de cargar JSON
-        tracklist = json.loads(decoded_tracklist)  # Intenta decodificar JSON
-    except json.JSONDecodeError as e:
-        print(f"❌ Error al decodificar tracklist: {e}")
+        # Obtener release desde master_id o release_id
+        if master_id:
+            d = get_discogs_client()
+            master = d.master(master_id)
+            master.refresh()
+            release = master.main_release
+            release.refresh()
+            release = release.data
+        elif release_id:
+            release_url = f"https://api.discogs.com/releases/{release_id}"
+            release = session.get(release_url).json()
+        else:
+            query = f"{clean_artist} {title}"
+            d = get_discogs_client()
+            results = d.search(query, type="master")
+            if not results:
+                raise ValueError("No se encontró el disco en Discogs.")
+            master = next(
+                (r for r in results if clean_artist and clean_artist.lower() in r.title.lower() and title.lower() in r.title.lower()),
+                results[0]
+            )
+            master.refresh()
+            release = master.main_release
+            release.refresh()
+            release = release.data
+
+        # Fallbacks para artista y título si vienen vacíos
+        if not clean_artist:
+            artist_data = release.get("artists", [])
+            if artist_data and isinstance(artist_data, list):
+                clean_artist = re.sub(r"\s*\(\d+\)$", "", artist_data[0].get("name", "").strip())
+            else:
+                clean_artist = "Unknown Artist"
+
+        if not title:
+            title = release.get("title", "").strip()
+
+        # Reconstruir query de búsqueda
+        query = f"{clean_artist} {title}"
+
+        # Imágenes del álbum
+        images = [img['uri'] for img in release.get('images', []) if img.get('uri')]
+
+        # Tracklist con previews de Deezer
         tracklist = []
+        for track in release.get("tracklist", []):
+            track_title = track.get("title", "Unknown")
+            duration = track.get("duration", "N/A")
+            deezer_info = None
+            duration_secs = None
 
-    record = {
-        'title': title,
-        'artists': artists,
-        'image_url': image_url,
-        'year': year,
-        'avg_rating': avg_rating,
-        'released': released,
-        'notes': notes,
-        'barcode': barcode,
-        'tags': tags,
-        'genres': genres,
-        'styles': styles,
-        'labels': labels,
-        'formats': formats,
-        'tracklist': tracklist
-    }
+            if duration and ":" in duration:
+                try:
+                    minutes, seconds = map(int, duration.split(":"))
+                    duration_secs = minutes * 60 + seconds
+                except ValueError:
+                    pass
 
-    return render(request, 'records/record_detail.html', {'record': record})
+            deezer_results = get_deezer_results(track_title, clean_artist or "")
+            if deezer_results:
+                for res in deezer_results:
+                    deezer_duration = res.get("duration")
+                    deezer_artist = res["artist"]["name"]
+
+                    # Match estricto por duración
+                    if duration_secs and deezer_duration:
+                        if abs(deezer_duration - duration_secs) <= 2 and normalize_name(deezer_artist) == normalize_name(clean_artist):
+                            deezer_info = {
+                                "preview_url": res["preview"],
+                                "deezer_link": res["link"],
+                                "deezer_artists": [deezer_artist]
+                            }
+                            break
+
+                    # Match sin duración, pero con preview disponible y coincidencia de nombre
+                    elif not duration_secs and res.get("preview"):
+                        if normalize_name(clean_artist) in normalize_name(deezer_artist):
+                            deezer_info = {
+                                "preview_url": res["preview"],
+                                "deezer_link": res["link"],
+                                "deezer_artists": [deezer_artist]
+                            }
+                            break
+
+            tracklist.append({
+                "position": track.get("position", ""),
+                "title": track_title,
+                "duration": duration,
+                "preview_url": deezer_info.get("preview_url") if deezer_info else None,
+                "deezer_link": deezer_info.get("deezer_link") if deezer_info else None,
+                "deezer_artists": deezer_info.get("deezer_artists") if deezer_info else []
+            })
+
+        # Construcción del contexto final del disco
+        record = {
+            'title': release.get("title", "Sin título"),
+            'artists': ', '.join(a['name'] for a in release.get("artists", [])) or "Desconocido",
+            'images': images,
+            'year': release.get("year", "Desconocido"),
+            'avg_rating': release.get("community", {}).get("rating", {}).get("average", "N/A"),
+            'released': release.get("released", "Desconocido"),
+            'notes': release.get("notes", "No hay notas"),
+            'barcode': ', '.join(i['value'] for i in release.get('identifiers', []) if i.get('type') == 'Barcode') or 'No disponible',
+            'tags': 'Sin etiquetas',
+            'genres': ', '.join(release.get('genres', [])) or 'Desconocido',
+            'styles': ', '.join(release.get('styles', [])) or 'Desconocido',
+            'labels': ', '.join(label.get('name') for label in release.get('labels', [])) or 'Desconocido',
+            'formats': ', '.join(fmt.get('name') for fmt in release.get('formats', [])) or 'Desconocido',
+            'tracklist': tracklist,
+            'versions': [],  # Para ser cargado vía AJAX si se desea
+            'master_id': master_id or release.get("master_id")
+        }
+
+        return render(request, 'records/record_detail.html', {'record': record})
+
+    except Exception as e:
+        print(f"❌ Error en record_detail: {e}")
+        return render(request, 'records/record_detail.html', {'record': {}, 'error': str(e)})
+
+
+
+
+
+def load_versions(request, master_id):
+    d = get_discogs_client()
+    page = int(request.GET.get('page', 1))
+    per_page = int(request.GET.get('per_page', 4))
+
+    try:
+        master = d.master(master_id)
+        all_versions = list(master.versions)
+
+        start = (page - 1) * per_page
+        end = start + per_page
+        versions_page = all_versions[start:end]
+
+        version_list = []
+        for v in versions_page:
+            rel = d.release(v.id)
+            rel.refresh()
+            rel_data = rel.data
+
+            version_list.append({
+                'id': rel.id,
+                'year': rel_data.get('year') or 'Desconocido',
+                'country': rel_data.get('country') or 'Desconocido',
+                'format': ', '.join(fmt['name'] for fmt in rel_data.get('formats', [])),
+                'label': ', '.join(label['name'] for label in rel_data.get('labels', [])),
+                'barcode': ', '.join(i['value'] for i in rel_data.get('identifiers', []) if i.get('type') == 'Barcode') or "No disponible"
+            })
+
+        return JsonResponse({'versions': version_list,
+                             'has_more': len(versions_page) == per_page
+                             })
+
+    except Exception as e:
+        print(f"⚠️ Error en load_versions: {e}")
+        return JsonResponse({'versions': []})
+
+
+
+def fetch_release_data(record):
+    main_release = getattr(record, 'main_release', None)
+    if not main_release:
+        return None
+
+    cache_key = f"release_{main_release.id}"
+    main_data = cache.get(cache_key)
+    if main_data:
+        return (record, main_data)
+
+    try:
+        main_release.refresh()
+        main_data = main_release.data
+        cache.set(cache_key, main_data, timeout=3600)
+        return (record, main_data)
+    except Exception as e:
+        print(f"⚠️ Error al refrescar {record.title}: {e}")
+        return None
+    
+
+
+
+

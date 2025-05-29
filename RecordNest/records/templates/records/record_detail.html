@@ -1,41 +1,253 @@
 {% extends 'main/base.html' %}
 
-{% block title %}Record Details{% endblock %}
+{% block title %}{{ record.title }} | RecordNest{% endblock %}
 
 {% block content %}
-    <h2>{{ record.title }}</h2>
-    
-    {% if record.image_url %}
-        <img src="{{ record.image_url }}" alt="Image">
-    {% else %}
-        <p>No image available</p>
-    {% endif %}
-    
-    <p><strong>Artists:</strong> {{ record.artists }}</p>
-    <p><strong>Year:</strong> {{ record.year }}</p>
-    <p><strong>Average Rating:</strong> {{ record.avg_rating }}</p>
-    <p><strong>Released:</strong> {{ record.released }}</p>
-    <p><strong>Notes:</strong> {{ record.notes }}</p>
-    <p><strong>Barcode:</strong> {{ record.barcode }}</p>
-    <p><strong>Tags:</strong> {{ record.tags }}</p>
-    
-    <p><strong>Genres:</strong> {{ record.genres }}</p>
-    <p><strong>Styles:</strong> {{ record.styles }}</p>
-    <p><strong>Labels:</strong> {{ record.labels }}</p>
-    <p><strong>Formats:</strong> {{ record.formats }}</p>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/record.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+<div class="record-container">
+    <h1>{{ record.title }}</h1>
+
+    <div class="record-header">
+        {% if record.images %}
+        <div class="image-carousel">
+            <button class="carousel-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+            <img id="carousel-img" loading ="lazy" src="{{ record.images.0 }}" alt="Portada del disco">
+            <button class="carousel-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        {% endif %}
+        
+
+        <div class="record-info">
+            <p><strong>Artistas:</strong> {{ record.artists }}</p>
+            <p><strong>Año:</strong> {{ record.year }}</p>
+            <p><strong>Rating Promedio:</strong> {{ record.avg_rating }}</p>
+            <p><strong>Lanzado:</strong> {{ record.released }}</p>
+            <p><strong>Notas:</strong> {{ record.notes }}</p>
+            <p><strong>Código de Barras:</strong> {{ record.barcode|default:"No disponible" }}</p>
+            <p><strong>Tags:</strong> {{ record.tags|default:"Sin etiquetas" }}</p>
+            <p><strong>Géneros:</strong> {{ record.genres }}</p>
+            <p><strong>Estilos:</strong> {{ record.styles }}</p>
+            <p><strong>Sello:</strong> {{ record.labels }}</p>
+            <p><strong>Formato:</strong> {{ record.formats }}</p>
+        </div>
+    </div>
 
     <h3>Tracklist</h3>
-    {% if record.tracklist %}
-        <ul>
-            {% for track in record.tracklist %}
-                <li>
-                    <strong>{{ track.position }}</strong> - {{ track.title }} ({{ track.duration }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No tracklist available</p>
-    {% endif %}
+    <div class="spotify-tracklist">
+        {% for track in record.tracklist %}
+            {% if record.tracklist %}
+                <div class="spotify-track">
+                    <div class="track-left">
+                        <div class="track-number">
+                            <span>{{ track.position }}</span>
+                        </div>
+                        <div class="track-meta">
+                            <div class="track-title">{{ track.title }}</div>
+                            {% if track.deezer_artists %}
+                                <div class="track-artist">{{ track.deezer_artists|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="track-right">
+                        <span class="track-duration">{{ track.duration }}</span>
+                    
+                        {% if track.preview_url %}
+                            <div class="custom-player" data-src="{{ track.preview_url }}">
+                                <button class="play-btn"><i class="fas fa-play"></i></button>
+                                <div class="progress-bar"><div class="progress"></div></div>
+                            </div>
+                            <a href="{{ track.deezer_link }}" target="_blank" class="deezer-btn">Deezer</a>
+                        {% else %}
+                            <span class="no-preview">🔇</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                    <p class="no-tracks">Este disco no tiene tracklist disponible.</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <span id="masterId" style="display: none;">{{ record.master_id }}</span>
+    
+    <h3>Versiones disponibles</h3>
 
+    <div id="versions-container" class="versions-grid">
+        {% for version in record.versions %}
+            <a href="{% url 'record_detail' version.id %}" class="version-card-link">
+                <div class="version-card">
+                    <p><strong>Año:</strong> {{ version.year }}</p>
+                    <p><strong>País:</strong> {{ version.country }}</p>
+                    <p><strong>Formato:</strong> {{ version.format }}</p>
+                    <p><strong>Sello:</strong> {{ version.label }}</p>
+                    <p><strong>Código de barras:</strong> {{ version.barcode }}</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+    <div id="masterId" style="display: none;">{{ record.master_id }}</div>
+    
+    <button id="load-more" class="load-more-btn">Cargar más versiones</button>
+    <div id="loading-spinner" style="display: none; margin-top: 1rem; text-align: center;">
+        <div class="spinner"></div>
+    </div>
+    
+    
 
+    <script>
+        const images = {{ record.images|safe }};
+        let currentIndex = 0;
+    
+        function changeSlide(direction) {
+            currentIndex = (currentIndex + direction + images.length) % images.length;
+            document.getElementById('carousel-img').src = images[currentIndex];
+        }
+    </script>
+        
+             
+</div>
+
+    <script>
+        document.querySelectorAll(".custom-player").forEach(player => {
+            const audio = new Audio(player.dataset.src);
+            const playBtn = player.querySelector(".play-btn");
+            const icon = playBtn.querySelector("i");
+            const progress = player.querySelector(".progress");
+        
+            let isPlaying = false;
+        
+            playBtn.addEventListener("click", () => {
+                document.querySelectorAll("audio").forEach(a => a.pause());
+                document.querySelectorAll(".custom-player").forEach(p => {
+                    if (p !== player) {
+                        const btn = p.querySelector("i");
+                        btn.classList.replace("fa-pause", "fa-play");
+                    }
+                });
+        
+                if (isPlaying) {
+                    audio.pause();
+                } else {
+                    audio.play();
+                }
+            });
+        
+            audio.addEventListener("play", () => {
+                isPlaying = true;
+                icon.classList.replace("fa-play", "fa-pause");
+            });
+        
+            audio.addEventListener("pause", () => {
+                isPlaying = false;
+                icon.classList.replace("fa-pause", "fa-play");
+            });
+        
+            audio.addEventListener("timeupdate", () => {
+                const percentage = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = percentage + "%";
+            });
+        
+            audio.addEventListener("ended", () => {
+                icon.classList.replace("fa-pause", "fa-play");
+                isPlaying = false;
+                progress.style.width = "0%";
+            });
+        });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const lazyPlayers = document.querySelectorAll(".custom-player");
+        
+                if ("IntersectionObserver" in window) {
+                    let observer = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const player = entry.target;
+                                if (!player.querySelector("audio")) { 
+                                    const audio = document.createElement("audio");
+                                    audio.src = player.getAttribute("data-src");
+                                    audio.preload = "none";
+                                    player.appendChild(audio);
+                                }
+                                observer.unobserve(player);
+                            }
+                        });
+                    }, {
+                        rootMargin: "100px"
+                    });
+        
+                    lazyPlayers.forEach(player => observer.observe(player));
+                } else {
+                    lazyPlayers.forEach(player => {
+                        const audio = document.createElement("audio");
+                        audio.src = player.getAttribute("data-src");
+                        audio.preload = "none";
+                        player.appendChild(audio);
+                    });
+                }
+            });
+        </script>
+        <script id="masterId" type="application/json">{{ record.master_id }}</script>
+
+        {{ record.master_id|json_script:"masterId" }}
+        <script>
+            let currentPage = 1;
+            const perPage = 4;
+            const masterId = document.getElementById("masterId").textContent;
+        
+            const loadMoreBtn = document.getElementById("load-more");
+        
+            loadMoreBtn.addEventListener("click", () => {
+                currentPage++;
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.innerText = "Cargando...";
+        
+                fetch(`/load-versions/${masterId}/?page=${currentPage}&per_page=${perPage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById("versions-container");
+        
+                        data.versions.forEach(v => {
+                            const link = document.createElement("a");
+                            link.href = `/search/record/detail/?release_id=${v.id}`;
+                            link.classList.add("version-card-link");
+
+                            const card = document.createElement("div");
+                            card.classList.add("version-card");
+                            card.innerHTML = `
+                            <p><strong>Año:</strong> ${v.year}</p>
+                            <p><strong>País:</strong> ${v.country}</p>
+                            <p><strong>Formato:</strong> ${v.format}</p>
+                            <p><strong>Sello:</strong> ${v.label}</p>
+                            <p><strong>Código de barras:</strong> ${v.barcode}</p>
+                            `;
+
+                            link.appendChild(card);
+                            container.appendChild(link);
+                        });
+        
+                        if (!data.versions.length || data.has_more === false) {
+                            loadMoreBtn.style.display = "none";
+                        } else {
+                            loadMoreBtn.disabled = false;
+                            loadMoreBtn.innerText = "Cargar más versiones";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar más versiones:", error);
+                        loadMoreBtn.innerText = "Error";
+                    });
+            });
+        </script>
+        
+        
+        
+            
+                    
+                
+        
 {% endblock %}

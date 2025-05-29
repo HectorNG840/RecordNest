@@ -1,0 +1,32 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}RecordNest{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Bienvenido a RecordNest</h1>
+        <p>Tu colección digital de discos, artistas y música favorita en un solo lugar.</p>
+        <a href="{% url 'signup' %}" class="cta-button">Empieza ahora</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature">
+        <i class="fas fa-compact-disc"></i>
+        <h3>Catálogo Extenso</h3>
+        <p>Explora millones de discos y artistas gracias a la base de datos de Discogs.</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-heart"></i>
+        <h3>Favoritos y Colecciones</h3>
+        <p>Organiza tus discos favoritos en colecciones personalizadas.</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-user"></i>
+        <h3>Perfil Personal</h3>
+        <p>Regístrate y guarda tus preferencias, colecciones y artistas seguidos.</p>
+    </div>
+</section>
+{% endblock %}

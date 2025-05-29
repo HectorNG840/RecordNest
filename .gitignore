@@ -5,3 +5,5 @@ __pycache__/
 .sqlite3
 .DS_Store
 RecordNest/db.sqlite3
+RecordNest/profile_pics/*
+RecordNest/RecordNest/__pycache__/*

@@ -1,0 +1,51 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="profile-container">
+  <div class="profile-header">
+    {% if user.profile_image %}
+      <img src="{{ user.profile_image.url }}" alt="Foto de perfil" class="profile-pic">
+    {% else %}
+      <img src="{% static 'img/default-user.png' %}" alt="Foto de perfil" class="profile-pic">
+    {% endif %}
+
+    <div class="profile-details">
+      <h2 class="profile-name">{{ user.username }}</h2>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Fecha de registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+      {% if user.bio %}
+        <p><strong>Biografía:</strong> {{ user.bio }}</p>
+      {% endif %}
+      <a href="{% url 'edit_profile' %}" class="edit-btn">Editar perfil</a>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Tus álbumes favoritos</h3>
+    <div class="favorites-grid">
+      {% for album in favorite_albums %}
+        <div class="album-tile">
+          <img src="{{ album.image_url }}" alt="{{ album.title }}">
+        </div>
+      {% empty %}
+        {% for i in "123"|make_list %}
+        <div class="album-tile placeholder">+</div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h3>Tus listas</h3>
+    <p>Aquí se mostrarán tus listas personalizadas próximamente.</p>
+  </div>
+</div>
+
+{% endblock %}

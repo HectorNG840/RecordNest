@@ -6,29 +6,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}RecordNest{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
 </head>
 <body>
-    <header>
-        <h1>RecordNest</h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'index' %}">Home</a></li>
-                <li><a href="">About</a></li>
-                <li><a href="">Contact</a></li>
-                <li><a href="">Collections</a></li>
-                <li><a href="">Login</a></li>
-                <li><a href="">Sign Up</a></li>
-                <form class="search-container" action="{% url 'search' %}" method="get">
-                    <input type="text" name="q" placeholder="Search..">
-                    <button type="submit"><i class="fa fa-search"></i></button>
-                </div>
-            </ul>
-        </nav>
-    </header>
+  <header class="navbar">
+    <div class="navbar-container">
+      
+      <!-- Logo -->
+      <div class="logo">
+        <a href="{% url 'index' %}">
+          <img src="{% static 'images/imagotipo.png' %}" alt="RecordNest">
+        </a>
+      </div>
+
+      <!-- Central nav links -->
+      <nav class="nav-links">
+        <a href="{% url 'index' %}">Home</a>
+        <a href="#">Collections</a>
+
+        <div class="dropdown">
+          <button class="dropbtn">
+            More <i class="fas fa-caret-down"></i>
+          </button>
+          <div class="dropdown-content">
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Right-side: Search + User -->
+      <div class="right-section">
+        <form action="{% url 'search' %}" method="get" class="search-bar">
+          <input type="text" name="q" placeholder="Search..." value="{{ query }}">
+          <select name="type" class="search-type">
+            <option value="master" {% if type == "master" %}selected{% endif %}>Discos</option>
+            <option value="artist" {% if type == "artist" %}selected{% endif %}>Artistas</option>
+          </select>
+          <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+
+        {% if user.is_authenticated %}
+        <div class="user-section">
+          <a href="{% url 'profile' user.username %}" class="profile-icon">
+              <a href="{% url 'profile' user.username %}" class="profile-avatar-link">
+                {% if user.profile_image %}
+                  <img src="{{ user.profile_image.url }}" alt="Perfil" class="profile-avatar">
+                {% else %}
+                  <img src="{% static 'img/default-user.png' %}" alt="Perfil" class="profile-avatar">
+                {% endif %}
+            </a>
+          </a>
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">Logout</button>
+          </form>
+        </div>
+        {% else %}
+        <div class="account-menu">
+          <button class="account-btn">
+            <i class="fas fa-user-circle"></i> Cuenta <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="account-dropdown">
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Sign Up</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      
+    </div>
+  </header>
+
+
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+      
     <main>
         {% block content %}
         {% endblock %}
     </main>
+    
+    <footer>
+      <div class="footer-container">
+        <div class="footer-column">
+          <h3>RecordNest</h3>
+          <p>Explora, guarda y organiza tu colección musical con acceso a millones de discos y artistas gracias a Discogs.</p>
+          <div class="footer-icons">
+            <a href="https://github.com/HectorNG840/" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/h%C3%A9ctor-noguera-gonz%C3%A1lez-a7093b350?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app "><i class="fab fa-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-column">
+          <h3>Contacto</h3>
+          <p><i class="fas fa-map-marker-alt"></i> Sevilla, España</p>
+          <p><i class="fas fa-envelope"></i> recordnest.app@gmail.com</p>
+          <p><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></p>
+          <p><a href="#"><i class="fas fa-file-alt"></i> Términos y condiciones</a></p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        © 2025 RecordNest. Todos los derechos reservados.
+      </div>
+    </footer>
+  {% block scripts %}
+  
+  {% endblock %}
 </body>
 </html>

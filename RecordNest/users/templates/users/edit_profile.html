@@ -1,0 +1,95 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/edit_profile.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" />
+
+<div class="form-container">
+  <h2>Editar Perfil</h2>
+  <form id="profileForm" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <!-- Botón para seleccionar nueva imagen -->
+    <button type="button" class="btn-secondary" onclick="document.getElementById('imageInput').click();">
+      Cambiar foto de perfil
+    </button>
+    <input type="file" id="imageInput" accept="image/*" hidden />
+
+    <!-- Vista previa + recorte -->
+    <div class="cropper-wrapper">
+      <img id="imagePreview"
+           src="{{ user.profile_image.url|default:'/static/img/default-user.png' }}"
+           alt="Previsualización"
+      />
+    </div>
+
+    <input type="hidden" name="cropped_image_data" id="croppedImageData" />
+
+    <button type="submit" class="btn-save">Guardar Cambios</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+<script>
+  console.log("✅ JS activo"); // Este DEBE salir
+
+  let cropper;
+
+  const imageInput = document.getElementById("imageInput");
+  const imagePreview = document.getElementById("imagePreview");
+  const croppedImageData = document.getElementById("croppedImageData");
+  const form = document.getElementById("profileForm");
+
+  imageInput.addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      imagePreview.src = event.target.result;
+      imagePreview.style.display = "block";
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(imagePreview, {
+        aspectRatio: 1,
+        viewMode: 1,
+        background: false,
+        autoCropArea: 1,
+        cropBoxResizable: false,
+        movable: true,
+        zoomable: true,
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  form.addEventListener("submit", function (e) {
+    if (cropper) {
+      e.preventDefault(); // bloquea envío normal
+
+      const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300,
+        imageSmoothingQuality: "high"
+      });
+
+      if (canvas) {
+        const dataUrl = canvas.toDataURL("image/png");
+        croppedImageData.value = dataUrl;
+
+        console.log("🟢 Imagen recortada generada");
+        console.log("📦 Length:", dataUrl.length);
+        form.submit(); // ahora sí se envía
+      } else {
+        console.warn("No se pudo generar el recorte.");
+        form.submit(); // continúa sin recorte
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+body {
+  background-color: #1b1b1b;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+}
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  color: #ddd;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+.form-container h2 {
+  color: #aed6b2;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #aed6b2;
+  padding-bottom: 0.3rem;
+}
+
+.form-container label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: #ccc;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="date"],
+.form-container textarea {
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e1e1e;
+  color: #fff;
+  font-size: 0.95rem;
+  resize: none; /* no agrandable */
+}
+
+.form-container input[type="text"]:focus,
+.form-container input[type="email"]:focus,
+.form-container input[type="date"]:focus,
+.form-container textarea:focus {
+  outline: none;
+  background-color: #2d2d2d;
+}
+
+.btn-save, .btn-secondary {
+  display: inline-block;
+  background: #aed6b2;
+  color: #111;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #8bcba0;
+}
+
+.btn-secondary {
+  background-color: #444;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.btn-secondary:hover {
+  background-color: #666;
+}
+
+.cropper-wrapper {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 2rem auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #111;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+#imagePreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
