@@ -12,7 +12,7 @@ def add_to_collection(request):
             artists=request.POST.get("artists", ""),
             year=request.POST.get("year", ""),
             cover_image=request.POST.get("cover_image", ""),
-            notes=request.POST.get("notes", "")
+            # Removed notes field as it is not part of the form
         )
         return redirect("my_collection")
     return HttpResponseBadRequest("Solicitud inválida")
