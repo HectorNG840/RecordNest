@@ -1,0 +1,17 @@
+<h2>Mi Colección</h2>
+<div class="grid-container">
+  {% for record in records %}
+    <a href="{% url 'local_record_detail' record.id %}" class="card-link">
+      <div class="card">
+        <img src="{{ record.cover_image|default:'/static/img/no-cover.png' }}" alt="{{ record.title }}">
+        <div class="card-body">
+          <h3>{{ record.title }}</h3>
+          <p>{{ record.artists }}</p>
+          <p><strong>Año:</strong> {{ record.year }}</p>
+        </div>
+      </div>
+    </a>
+  {% empty %}
+    <p>No hay discos en tu colección.</p>
+  {% endfor %}
+</div>

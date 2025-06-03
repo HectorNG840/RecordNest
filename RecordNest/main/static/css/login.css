@@ -1,7 +1,7 @@
 body {
   background-color: #1b1b1b;
   color: #e0e0e0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .login-form {
@@ -10,7 +10,7 @@ body {
   padding: 2rem;
   background-color: #2a2a2a;
   border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .login-form h2 {

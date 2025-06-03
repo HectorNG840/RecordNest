@@ -35,6 +35,14 @@
             <p><strong>Sello:</strong> {{ record.labels }}</p>
             <p><strong>Formato:</strong> {{ record.formats }}</p>
         </div>
+        <form action="{% url 'add_to_collection' %}" method="post" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <input type="hidden" name="title" value="{{ record.title }}">
+            <input type="hidden" name="artists" value="{{ record.artists }}">
+            <input type="hidden" name="year" value="{{ record.year }}">
+            <input type="hidden" name="cover_image" value="{{ record.images.0|default:'' }}">
+            <button type="submit" class="add-btn">➕ Añadir a mi colección</button>
+        </form>
     </div>
 
     <h3>Tracklist</h3>

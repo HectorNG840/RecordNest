@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from records.views import get_oauth_session
 from concurrent.futures import ThreadPoolExecutor
+import re
 
 def fetch_cover_image(release, session):
     cover_image = release.get("thumb")  # fallback por defecto
@@ -33,30 +34,34 @@ def fetch_cover_image(release, session):
         "artist": release.get("artist", "")
     }
 
+def clean_bbcode(text: str) -> str:
+    # Reemplazar [b]...[/b] y similares → solo su contenido
+    text = re.sub(r'\[/?[biu]\]', '', text)
+
+    # Reemplazar [a=storm (85)] → solo "storm (85)"
+    text = re.sub(r'\[a=(.*?)\]', r'\1', text)
+
+    # Quitar otras etiquetas restantes que no tengan valor visible
+    text = re.sub(r'\[/?[^\]]+\]', '', text)
+
+    return text
 
 def artist_detail(request):
-    artist_name = request.GET.get("name", "").strip()
-    if not artist_name:
-        return render(request, 'artists/artist_detail.html', {'error': 'Nombre de artista no proporcionado'})
+    artist_id = request.GET.get("id", "").strip()
+    if not artist_id:
+        return render(request, 'artists/artist_detail.html', {'error': 'ID de artista no proporcionado'})
 
     session = get_oauth_session()
-    search_url = "https://api.discogs.com/database/search"
-    params = {"q": artist_name, "type": "artist", "per_page": 1, "page": 1}
 
-    response = session.get(search_url, params=params)
-    data = response.json()
-    result = data.get("results", [])[0] if data.get("results") else None
-
-    if not result:
-        return render(request, 'artists/artist_detail.html', {'error': 'Artista no encontrado'})
-
-    artist_id = result["id"]
     detail = session.get(f"https://api.discogs.com/artists/{artist_id}").json()
+    artist_name = detail.get("name", "")
+
+    raw_profile = detail.get("profile", "")
+    profile_clean = clean_bbcode(raw_profile)
 
     mode = request.GET.get("mode", "main")
     current_page = int(request.GET.get("page", 1))
 
-    # Obtener releases (1 página = 100 items max)
     releases_url = f"https://api.discogs.com/artists/{artist_id}/releases"
     raw_response = session.get(releases_url, params={"page": 1, "per_page": 100}).json()
     all_releases = raw_response.get("releases", [])
@@ -74,9 +79,10 @@ def artist_detail(request):
 
     context = {
         "artist": {
-            "name": result["title"],
+            "id": artist_id,
+            "name": artist_name,
             "image_url": detail.get("images", [{}])[0].get("uri", ""),
-            "profile": detail.get("profile", "")
+            "profile": profile_clean
         },
         "releases": enhanced_releases,
         "current_page": current_page,
@@ -89,4 +95,5 @@ def artist_detail(request):
     }
 
     return render(request, "artists/artist_detail.html", context)
+
 

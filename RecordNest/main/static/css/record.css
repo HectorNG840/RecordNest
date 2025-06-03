@@ -72,10 +72,17 @@ body {
 .next-btn { right: 10px; }
 
 /* INFO DISCO */
+
+.record-info {
+  flex: 1;
+  min-width: 280px;
+}
+
 .record-info p {
   margin: 0.4rem 0;
   color: #ccc;
   font-size: 0.95rem;
+  
 }
 
 .record-info p strong {

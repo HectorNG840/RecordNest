@@ -3,3 +3,4 @@ pytest-django
 Pillow
 discog-client
 python-decouple
+bbcode

@@ -8,21 +8,21 @@
 
   <!-- Cabecera del artista -->
   <div class="artist-header">
-    {% if artist.image_url %}
-      <img src="{{ artist.image_url }}" alt="{{ artist.name }}" class="artist-photo">
-    {% endif %}
+    <img src="{{ artist.image_url|default:'/static/images/placeholder-image.png' }}" alt="{{ artist.name }}" class="artist-photo">
     <div class="artist-info">
       <h1>{{ artist.name }}</h1>
       {% if artist.profile %}
-        <p>{{ artist.profile }}</p>
+        <p>{{ artist.profile|safe}}</p>
+      {% else %}
+        <p>Información no disponible.</p>
       {% endif %}
     </div>
   </div>
 
   <!-- Selector de modo -->
   <div class="mode-toggle">
-    <a href="?name={{ artist.name|urlencode }}&mode=main" class="{% if mode == 'main' %}active{% endif %}">Discografía principal</a>
-    <a href="?name={{ artist.name|urlencode }}&mode=appearances" class="{% if mode == 'appearances' %}active{% endif %}">Apariciones</a>
+    <a href="?id={{ artist.id }}&mode=main" class="{% if mode == 'main' %}active{% endif %}">Discografía principal</a>
+    <a href="?id={{ artist.id }}&mode=appearances" class="{% if mode == 'appearances' %}active{% endif %}">Apariciones</a>
   </div>
 
 
@@ -38,7 +38,7 @@
          data-year="{{ release.year|default:'0' }}">
         <div class="card">
           <div class="image-container">
-            <img src="{{ release.cover_image|default:'/static/img/no-cover.png' }}" alt="{{ release.title }}">
+            <img src="{{ release.cover_image|default:'/static/images/placeholder-image.png' }}" alt="{{ release.title }}">
           </div>
           <div class="card-body">
             <h3 class="card-title">{{ release.title }}</h3>
@@ -55,11 +55,11 @@
   {% if total_pages > 1 %}
     <div class="pagination">
       {% if has_previous %}
-        <a href="?name={{ artist.name|urlencode }}&mode={{ mode }}&page={{ previous_page_number }}">&laquo; Anterior</a>
+        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ previous_page_number }}">&laquo; Anterior</a>
       {% endif %}
       <span>Página {{ current_page }} de {{ total_pages }}</span>
       {% if has_next %}
-        <a href="?name={{ artist.name|urlencode }}&mode={{ mode }}&page={{ next_page_number }}">Siguiente &raquo;</a>
+        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ next_page_number }}">Siguiente &raquo;</a>
       {% endif %}
     </div>
   {% endif %}
