@@ -64,6 +64,7 @@ def fetch_artist_detail(result):
 
     return {
             "type": "artist",
+            "id": artist_id,
             "name": name,
             "image_url": image_url,
         }

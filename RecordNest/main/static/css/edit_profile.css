@@ -1,7 +1,7 @@
 body {
   background-color: #1b1b1b;
   color: #e0e0e0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 .form-container {
   max-width: 600px;
@@ -10,7 +10,7 @@ body {
   background-color: #2a2a2a;
   border-radius: 16px;
   color: #ddd;
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .form-container h2 {
@@ -51,7 +51,8 @@ body {
   background-color: #2d2d2d;
 }
 
-.btn-save, .btn-secondary {
+.btn-save,
+.btn-secondary {
   display: inline-block;
   background: #aed6b2;
   color: #111;
@@ -87,7 +88,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   background-color: #111;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 #imagePreview {
