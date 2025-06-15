@@ -1,0 +1,158 @@
+body {
+    background-color: #1b1b1b;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+}
+
+.collection-title {
+    font-size: 2rem;
+    margin: 2rem 4rem 1rem;
+    color: #aed6b2;
+}
+
+/* Rejilla de tarjetas */
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2rem;
+    padding: 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Tarjeta individual */
+.collection-card {
+  position: relative;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease-in-out;
+}
+
+.collection-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Imagen del disco */
+.collection-card .image-container {
+    width: 90%;
+    height: 260px;
+    margin: 1rem auto 0.5rem;
+    border-radius: 8px;
+    background-color: #2a2a2a;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Texto y metadatos */
+.collection-card .card-body {
+    padding: 1rem;
+    font-size: 0.95rem;
+    color: #ddd;
+}
+
+.collection-card .card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #7fddb1;
+    margin-bottom: 0.6rem;
+}
+
+.collection-card .card-body p {
+    margin: 0.4rem 0;
+    color: #ccc;
+}
+
+.collection-card .card-body p strong {
+    color: #fff;
+}
+
+.collection-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-options {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+.menu-btn {
+  background: transparent;
+  color: #ccc;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 30px;
+  background-color: #333;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  z-index: 999;
+  padding: 0.5rem;
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+  display: block;
+  padding: 0.4rem 1rem;
+  color: #fff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+  background-color: #444;
+}
+
+.tag-filter-container {
+    display: flex;
+    justify-content: flex-start;
+    margin: 2rem 4rem 1rem;
+}
+
+.tag-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tag-filter-label {
+    font-weight: 600;
+    color: #c8facc;
+    font-size: 1rem;
+}
+
+.tag-filter-select {
+    background-color: #1f1f1f;
+    color: #c8facc;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.tag-filter-select:focus {
+    outline: none;
+    border-color: #77f7a0;
+    box-shadow: 0 0 4px #77f7a080;
+}
