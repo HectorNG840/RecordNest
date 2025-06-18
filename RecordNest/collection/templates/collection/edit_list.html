@@ -1,0 +1,13 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="create-list-container">
+    <h2 class="section-title">Editar Lista</h2>
+    <form method="post" class="create-list-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary">Guardar cambios</button>
+    </form>
+</div>
+{% endblock %}

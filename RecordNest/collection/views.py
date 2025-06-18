@@ -2,7 +2,8 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import UserRecord, Track, Tag
+from .forms import RecordListForm
+from .models import UserRecord, Track, Tag, RecordList
 import json
 
 @login_required
@@ -72,12 +73,14 @@ def my_collection(request):
             records = records.filter(tags__id=tag_id)
         except ValueError:
             pass  # fallback seguro si el id no es válido
-
+        
+    user_lists = RecordList.objects.filter(user=request.user)        
     user_tags = Tag.objects.filter(user=user)
     return render(request, "collection/collection_list.html", {
         "records": records,
         "tags": user_tags,
         "selected_tag": int(tag_id) if tag_id else None,
+        'user_lists': user_lists,
     })
 
 @login_required
@@ -134,4 +137,49 @@ def remove_tag(request, record_id, tag_id):
         record.tags.add(default_tag)
 
     return redirect("local_record_detail", record_id=record.id)
+
+@login_required
+def my_lists(request):
+    lists = RecordList.objects.filter(user=request.user)
+    return render(request, 'collection/my_lists.html', {'lists': lists})
+
+@login_required
+def create_list(request):
+    if request.method == 'POST':
+        form = RecordListForm(request.POST)
+        if form.is_valid():
+            record_list = form.save(commit=False)
+            record_list.user = request.user
+            record_list.save()
+            return redirect('my_lists')
+    else:
+        form = RecordListForm()
+    return render(request, 'collection/create_list.html', {'form': form})
+
+@login_required
+def add_record_to_list(request, record_id, list_id):
+    record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
+    record = get_object_or_404(UserRecord, id=record_id, user=request.user)
+    record_list.records.add(record)
+    return redirect('my_lists')
+
+@login_required
+def delete_list(request, list_id):
+    record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
+    record_list.delete()
+    return redirect('my_lists')  # Ajusta al nombre de tu URL
+
+@login_required
+def edit_list(request, list_id):
+    record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = RecordListForm(request.POST, instance=record_list)
+        if form.is_valid():
+            form.save()
+            return redirect('my_lists')
+    else:
+        form = RecordListForm(instance=record_list)
+
+    return render(request, 'collection/edit_list.html', {'form': form})
 

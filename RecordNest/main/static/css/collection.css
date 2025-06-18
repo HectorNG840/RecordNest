@@ -1,28 +1,28 @@
 body {
-    background-color: #1b1b1b;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #fff;
+  background-color: #1b1b1b;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #fff;
 }
 
 .collection-title {
-    font-size: 2rem;
-    margin: 2rem 4rem 1rem;
-    color: #aed6b2;
+  font-size: 2rem;
+  margin: 2rem 4rem 1rem;
+  color: #aed6b2;
 }
 
-/* Rejilla de tarjetas */
+/* Grid */
 .collection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 2rem;
-    padding: 2rem 4rem;
-    max-width: 1400px;
-    margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+  padding: 2rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* Tarjeta individual */
+/* Card */
 .collection-card {
   position: relative;
   background-color: #2a2a2a;
@@ -31,53 +31,44 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease-in-out;
 }
-
 .collection-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
-/* Imagen del disco */
-.collection-card .image-container {
-    width: 90%;
-    height: 260px;
-    margin: 1rem auto 0.5rem;
-    border-radius: 8px;
-    background-color: #2a2a2a;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+.image-container {
+  width: 90%;
+  height: 260px;
+  margin: 1rem auto 0.5rem;
+  border-radius: 8px;
+  background: #2a2a2a center / contain no-repeat;
 }
 
-/* Texto y metadatos */
-.collection-card .card-body {
-    padding: 1rem;
-    font-size: 0.95rem;
-    color: #ddd;
+.card-body {
+  padding: 1rem;
+  font-size: 0.95rem;
+  color: #ddd;
 }
-
-.collection-card .card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #7fddb1;
-    margin-bottom: 0.6rem;
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #7fddb1;
+  margin-bottom: 0.6rem;
 }
-
-.collection-card .card-body p {
-    margin: 0.4rem 0;
-    color: #ccc;
+.card-body p {
+  margin: 0.4rem 0;
+  color: #ccc;
 }
-
-.collection-card .card-body p strong {
-    color: #fff;
+.card-body p strong {
+  color: #fff;
 }
-
 .collection-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
+/* Dropdown menú */
 .card-options {
   position: absolute;
   bottom: 10px;
@@ -98,61 +89,214 @@ body {
   position: absolute;
   right: 0;
   bottom: 30px;
-  background-color: #333;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-  z-index: 999;
-  padding: 0.5rem;
+  z-index: 1000;
+  min-width: 180px;
+  padding: 10px;
+  background-color: #2d2d2d;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+.dropdown-menu h4 {
+  color: #b6ffca;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  text-align: center;
+  border-bottom: 1px solid #444;
+  padding-bottom: 6px;
+}
+.dropdown-menu form {
+  margin: 4px 0;
 }
 
-.dropdown-menu a,
-.dropdown-menu button {
+/* Opción común (btn y link) */
+.dropdown-option-btn,
+.dropdown-create-link {
   display: block;
-  padding: 0.4rem 1rem;
-  color: #fff;
-  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  color: #ffffff;
   background: none;
   border: none;
-  cursor: pointer;
-  text-align: left;
   width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  font-weight: 500;
+  text-decoration: none;
+}
+.dropdown-option-btn:hover,
+.dropdown-create-link:hover {
+  background-color: #3e3e3e;
+  color: #b6ffca;
 }
 
-.dropdown-menu a:hover,
-.dropdown-menu button:hover {
-  background-color: #444;
+/* Crear lista especial */
+.dropdown-create-link {
+  color: #c4a1ff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dropdown-create-link::before {
+  font-size: 1.2rem;
+  color: #c4a1ff;
 }
 
+/* Dropdown interno */
+.dropdown-label {
+  display: block;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #b6ffca;
+  text-align: center;
+  border-bottom: 1px solid #444;
+  margin-bottom: 8px;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+}
+.dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dropdown-options li {
+  margin: 4px 0;
+}
+
+.dropdown-separator {
+  border: none;
+  border-top: 1px solid #444;
+  margin: 8px 0;
+}
+
+.dropdown-danger {
+  color: #ff8a8a;
+  font-weight: 600;
+}
+
+.dropdown-danger:hover {
+  background-color: #3a1e1e;
+  color: #ffb2b2;
+}
+
+
+/* Filtro por tags */
 .tag-filter-container {
-    display: flex;
-    justify-content: flex-start;
-    margin: 2rem 4rem 1rem;
+  display: flex;
+  justify-content: flex-start;
+  margin: 2rem 4rem 1rem;
 }
-
 .tag-filter-form {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
-
 .tag-filter-label {
-    font-weight: 600;
-    color: #c8facc;
-    font-size: 1rem;
+  font-weight: 600;
+  color: #c8facc;
+  font-size: 1rem;
 }
-
 .tag-filter-select {
-    background-color: #1f1f1f;
-    color: #c8facc;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.95rem;
-    transition: all 0.2s ease-in-out;
+  background-color: #1f1f1f;
+  color: #c8facc;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+}
+.tag-filter-select:focus {
+  outline: none;
+  border-color: #77f7a0;
+  box-shadow: 0 0 4px #77f7a080;
 }
 
-.tag-filter-select:focus {
-    outline: none;
-    border-color: #77f7a0;
-    box-shadow: 0 0 4px #77f7a080;
+/* Crear lista view */
+.create-list-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
 }
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #b9fbc0;
+}
+.create-list-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.form-label {
+  font-weight: bold;
+  color: #eee;
+}
+.form-input {
+  padding: 0.6rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #2b2b2b;
+  color: #fff;
+}
+.btn-primary {
+  background-color: #65c18c;
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-primary:hover {
+  background-color: #4aa46c;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem 1rem;
+}
+
+.action-btn {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 5px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #fff;
+}
+
+.edit-btn {
+  background-color: #4caf50;
+}
+
+.edit-btn:hover {
+  background-color: #3d8b40;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+

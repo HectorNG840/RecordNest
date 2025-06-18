@@ -35,14 +35,30 @@
       </a>
 
       <div class="card-options">
-        <button class="menu-btn" onclick="toggleMenu(this)">
-          ⋮
-        </button>
+        <button class="menu-btn" onclick="toggleMenu(this)">⋮</button>
         <div class="dropdown-menu">
-          <button type="submit" class="dropdown-delete">Añadir a lista</button>
+          <div class="custom-dropdown">
+            <button type="button" class="dropdown-label" onclick="toggleDropdown(this)">Añadir a lista</button>
+            <ul class="dropdown-options" style="display: none;">
+              {% for list in user_lists %}
+                <li>
+                  <form method="post" action="{% url 'add_record_to_list' record.id list.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-option-btn">{{ list.name }}</button>
+                  </form>
+                </li>
+              {% endfor %}
+              <li>
+                <a href="{% url 'create_list' %}" class="dropdown-create-link">Nueva lista</a>
+              </li>
+            </ul>
+          </div>
+
+          <hr class="dropdown-separator">
+
           <form action="{% url 'delete_from_collection' record.id %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="dropdown-delete">Eliminar</button>
+            <button type="submit" class="dropdown-option-btn dropdown-danger">Eliminar</button>
           </form>
         </div>
       </div>
@@ -51,6 +67,7 @@
     <p class="no-results">No hay discos en tu colección aún.</p>
   {% endfor %}
 </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -69,8 +86,40 @@ function toggleMenu(button) {
 
 document.addEventListener('click', () => {
   document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+  document.querySelectorAll('.dropdown-options').forEach(opt => opt.style.display = 'none');
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".dropdown-toggle").forEach(toggle => {
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const menu = this.nextElementSibling;
+      document.querySelectorAll(".dropdown-options").forEach(opt => {
+        if (opt !== menu) opt.style.display = "none";
+      });
+      menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    });
+  });
+});
+</script>
+
+<script>
+function toggleDropdown(button) {
+  event.stopPropagation();
+  const dropdown = button.nextElementSibling;
+
+  // Cierra todos los demás dropdowns
+  document.querySelectorAll('.dropdown-options').forEach(el => {
+    if (el !== dropdown) el.style.display = 'none';
+  });
+
+  dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+}
+
+// Cierra el dropdown al hacer click fuera
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-options').forEach(el => el.style.display = 'none');
+});
 </script>
 
 {% endblock %}

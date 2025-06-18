@@ -41,3 +41,12 @@ class Track(models.Model):
     def __str__(self):
         return f"{self.position} - {self.title}"
 
+class RecordList(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description = models.TextField(blank=True, null=True)
+    records = models.ManyToManyField("UserRecord", related_name="lists")
+
+    def __str__(self):
+        return self.name
+
