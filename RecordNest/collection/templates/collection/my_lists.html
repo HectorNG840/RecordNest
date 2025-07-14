@@ -1,0 +1,37 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Mis Listas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/collection.css' %}">
+
+<h2 class="collection-title">Mis Listas</h2>
+
+<div class="collection-grid">
+  {% for lista in lists %}
+    <div class="collection-card">
+      <a href="{% url 'list_detail' lista.id %}" class="collection-link">
+        <div class="image-container" style="background-image: url('{{ lista.records.first.cover_image|default:'/static/images/placeholder-image.png' }}');"></div>
+        <div class="card-body">
+          <h3 class="card-title">{{ lista.name }}</h3>
+          <p class="card-description">{{ lista.description|default:"Sin descripción" }}</p>
+        </div>
+      </a>
+      <div class="card-actions">
+        <a href="{% url 'edit_list' lista.id %}" class="action-btn edit-btn">Editar</a>
+        <form method="post" action="{% url 'delete_list' lista.id %}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="action-btn delete-btn">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <p class="no-results">No tienes listas todavía.</p>
+  {% endfor %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+  <a href="{% url 'create_list' %}" class="cta-button">Crear nueva lista</a>
+</div>
+{% endblock %}

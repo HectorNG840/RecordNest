@@ -1,17 +1,127 @@
-<h2>Mi Colección</h2>
-<div class="grid-container">
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Mi Colección{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/collection.css' %}">
+
+<h2 class="collection-title">Mi Colección</h2>
+
+<div class="tag-filter-container">
+    <form method="get" class="tag-filter-form">
+        <label for="tag" class="tag-filter-label">Filtrar por tag:</label>
+        <select name="tag" id="tag" class="tag-filter-select" onchange="this.form.submit()">
+            <option value="">-- Todas --</option>
+            {% for tag in tags %}
+                <option value="{{ tag.id }}" {% if tag.id == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="collection-grid">
   {% for record in records %}
-    <a href="{% url 'local_record_detail' record.id %}" class="card-link">
-      <div class="card">
-        <img src="{{ record.cover_image|default:'/static/img/no-cover.png' }}" alt="{{ record.title }}">
+    <div class="collection-card">
+      <a href="{% url 'local_record_detail' record.id %}" class="collection-link">
+        <div class="image-container" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
         <div class="card-body">
-          <h3>{{ record.title }}</h3>
-          <p>{{ record.artists }}</p>
-          <p><strong>Año:</strong> {{ record.year }}</p>
+          <h3 class="card-title">{{ record.title }}</h3>
+          <p><strong>Artista:</strong> {{ record.artists }}</p>
+          <p><strong>Año:</strong> {{ record.year|default:"Desconocido" }}</p>
+          <p><strong>Géneros:</strong> {{ record.genres|default:"Desconocidos" }}</p>
+          <p><strong>Formato:</strong> {{ record.formats|default:"Desconocido" }}</p>
+        </div>
+      </a>
+
+      <div class="card-options">
+        <button class="menu-btn" onclick="toggleMenu(this)">⋮</button>
+        <div class="dropdown-menu">
+          <div class="custom-dropdown">
+            <button type="button" class="dropdown-label" onclick="toggleDropdown(this)">Añadir a lista</button>
+            <ul class="dropdown-options" style="display: none;">
+              {% for list in user_lists %}
+                <li>
+                  <form method="post" action="{% url 'add_record_to_list' record.id list.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-option-btn">{{ list.name }}</button>
+                  </form>
+                </li>
+              {% endfor %}
+              <li>
+                <a href="{% url 'create_list' %}" class="dropdown-create-link">Nueva lista</a>
+              </li>
+            </ul>
+          </div>
+
+          <hr class="dropdown-separator">
+
+          <form action="{% url 'delete_from_collection' record.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-option-btn dropdown-danger">Eliminar</button>
+          </form>
         </div>
       </div>
-    </a>
+    </div>
   {% empty %}
-    <p>No hay discos en tu colección.</p>
+    <p class="no-results">No hay discos en tu colección aún.</p>
   {% endfor %}
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleMenu(button) {
+  event.stopPropagation();
+  const menu = button.nextElementSibling;
+
+  // Cerrar otros
+  document.querySelectorAll('.dropdown-menu').forEach(m => {
+    if (m !== menu) m.style.display = 'none';
+  });
+
+  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+  document.querySelectorAll('.dropdown-options').forEach(opt => opt.style.display = 'none');
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".dropdown-toggle").forEach(toggle => {
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const menu = this.nextElementSibling;
+      document.querySelectorAll(".dropdown-options").forEach(opt => {
+        if (opt !== menu) opt.style.display = "none";
+      });
+      menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    });
+  });
+});
+</script>
+
+<script>
+function toggleDropdown(button) {
+  event.stopPropagation();
+  const dropdown = button.nextElementSibling;
+
+  // Cierra todos los demás dropdowns
+  document.querySelectorAll('.dropdown-options').forEach(el => {
+    if (el !== dropdown) el.style.display = 'none';
+  });
+
+  dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+}
+
+// Cierra el dropdown al hacer click fuera
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-options').forEach(el => el.style.display = 'none');
+});
+</script>
+
+{% endblock %}
+
+

@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}{{ record_list.name }} | Mi Colección{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/collection.css' %}">
+
+<div class="list-detail-container">
+  <h2 class="collection-title">{{ record_list.name }}</h2>
+  <p class="list-description">{{ record_list.description }}</p>
+
+  {% if records %}
+    <div class="record-list">
+      {% for record in records %}
+        <div class="record-row-card">
+          <div class="record-cover" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
+          <div class="record-meta">
+            <h3 class="record-title">{{ record.title }}</h3>
+            <p><strong>Artista:</strong> {{ record.artists }}</p>
+            <p><strong>Año:</strong> {{ record.year }}</p>
+            <p><strong>Géneros:</strong> {{ record.genres }}</p>
+            <p><strong>Formato:</strong> {{ record.formats }}</p>
+          </div>
+          <form method="post" action="{% url 'remove_record_from_list' record_list.id record.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-remove-record">Quitar</button>
+          </form>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No hay discos en esta lista.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -8,3 +8,4 @@ __pycache__/
 RecordNest/db.sqlite3
 RecordNest/profile_pics/*
 RecordNest/RecordNest/__pycache__/*
+staticfiles/

@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 import base64
 from django.core.files.base import ContentFile
+from records.models import Record
+from collection.models import UserRecord, FavoriteRecord, RecordList
 
 
 from .forms import CustomUserCreationForm, ProfileUpdateForm
@@ -43,9 +45,27 @@ def signup(request):
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
 
+@login_required
 def profile(request, username):
     user_profile = get_object_or_404(CustomUser, username=username)
-    return render(request, "users/profile.html", {"profile_user": user_profile})
+
+    # Crea favoritos si no existen aún
+    favorite_obj, _ = FavoriteRecord.objects.get_or_create(user=user_profile)
+    user_lists = RecordList.objects.filter(user=user_profile)
+
+    # Lista ordenada para el template
+    favorite_records = [
+        favorite_obj.record_1,
+        favorite_obj.record_2,
+        favorite_obj.record_3,
+    ]
+
+    return render(request, "users/profile.html", {
+        "user": request.user,
+        "profile_user": user_profile,
+        "favorite_records": favorite_records,
+        "user_lists": user_lists,
+    })
     
 def activate(request, uidb64, token):
     user = None
@@ -94,3 +114,30 @@ def edit_profile(request):
         form = ProfileUpdateForm(instance=user)
 
     return render(request, "users/edit_profile.html", {"form": form})
+
+@login_required
+def select_favorite_record(request, slot):
+    user = request.user
+    favorite_obj, _ = FavoriteRecord.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id')
+        try:
+            record = UserRecord.objects.get(id=record_id, user=user)
+            if slot == 1:
+                favorite_obj.record_1 = record
+            elif slot == 2:
+                favorite_obj.record_2 = record
+            elif slot == 3:
+                favorite_obj.record_3 = record
+            favorite_obj.save()
+        except UserRecord.DoesNotExist:
+            pass
+        return redirect('profile', username=user.username)
+
+    # Si GET, mostrar formulario
+    user_records = UserRecord.objects.filter(user=user)
+    return render(request, 'users/select_favourite_record.html', {
+        'slot': slot,
+        'user_records': user_records
+    })

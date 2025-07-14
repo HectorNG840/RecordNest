@@ -1,0 +1,84 @@
+.section-title {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.record-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.record-option input[type="radio"] {
+  display: none;
+}
+
+.record-card {
+  height: 250px;
+  background-color: #222;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 160px;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.record-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.record-info {
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.record-info .title {
+  color: #eee;
+  font-size: 0.9rem;
+}
+
+.record-option input[type="radio"]:checked + .record-card {
+  border-color: #98e0b5;
+  box-shadow: none;
+}
+
+.form-actions {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.btn-save,
+.btn-cancel {
+  display: inline-block;
+  margin: 0 1rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn-save {
+  display: inline-block;
+  background-color: #98e0b5;
+  color: #000;
+  border: none;
+  transition: background 0.2s;
+
+}
+.btn-save:hover {
+  cursor: pointer;
+  background-color: #8bcba0;
+}
+
+.btn-cancel {
+  color: #ccc;
+  border: 1px solid #444;
+  background: none;
+}

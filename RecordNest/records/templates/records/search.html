@@ -16,7 +16,7 @@
       {% if result.type == "master" %}
         <a href="{% url 'record_detail' %}?title={{ result.title|urlencode }}&artists={{ result.artists|urlencode }}" class="card-link">
           <div class="card master-card">
-            <div class="image-container" style="background-image: url('{{ result.image_url|default:'/static/images/placeholder-image.png' }}');"></div>
+            <div class="image-container" style="background-image: url('{{ result.image_url|default:'/static/images/placeholder-record.png' }}');"></div>
             <div class="card-body">
               <h3 class="card-title">{{ result.title }}</h3>
               <p><strong>Artista:</strong> {{ result.artists }}</p>

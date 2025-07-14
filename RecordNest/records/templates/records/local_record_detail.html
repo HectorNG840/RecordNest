@@ -1,0 +1,144 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ record.title }} | Mi Colección{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/record.css' %}">
+
+<div class="record-container">
+    <h1>{{ record.title }}</h1>
+
+    <div class="record-header">
+        {% if record.cover_image %}
+        <div class="image-carousel">
+            <img id="carousel-img" loading="lazy" src="{{ record.cover_image }}" alt="Portada del disco">
+        </div>
+        {% endif %}
+
+        <div class="record-info">
+            <p><strong>Artistas:</strong> {{ record.artists }}</p>
+            <p><strong>Año:</strong> {{ record.year }}</p>
+            <p><strong>Lanzado:</strong> {{ record.released }}</p>
+            <p><strong>Notas:</strong> {{ record.notes }}</p>
+            <p><strong>Código de Barras:</strong> {{ record.barcode }}</p>
+            <p><strong>Tags:</strong></p>
+            <div class="tags-container">
+                {% for tag in record.tags.all %}
+                    <form method="post" action="{% url 'remove_tag' record.id tag.id %}" class="tag-form">
+                        {% csrf_token %}
+                        <span class="tag-chip">
+                            {{ tag.name }}
+                            <button type="submit" class="tag-remove-btn">&times;</button>
+                        </span>
+                    </form>
+                {% endfor %}
+
+                <form method="post" action="{% url 'add_tag' record.id %}" class="tag-add-form" style="display: flex; gap: 8px; align-items: center;">
+                    {% csrf_token %}
+                    <select name="existing_tag" class="tag-select">
+                        <option disabled selected>Añade una tag</option>
+                        {% for tag in user_tags %}
+                            <option value="{{ tag.id }}">{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="tag-add-btn">➕</button>
+                </form>
+
+
+            </div>
+            <p><strong>Géneros:</strong> {{ record.genres }}</p>
+            <p><strong>Estilos:</strong> {{ record.styles }}</p>
+            <p><strong>Sello:</strong> {{ record.labels }}</p>
+            <p><strong>Formato:</strong> {{ record.formats }}</p>
+        </div>
+    </div>
+    <h3>Tracklist</h3>
+    <div class="spotify-tracklist">
+    {% for track in tracks %}
+        <div class="spotify-track">
+        <div class="track-left">
+            <div class="track-number">
+            <span>{{ track.position }}</span>
+            </div>
+            <div class="track-meta">
+            <div class="track-title">{{ track.title }}</div>
+            {% if track.deezer_artists %}
+                <div class="track-artist">{{ track.deezer_artists }}</div>
+            {% endif %}
+            </div>
+        </div>
+        <div class="track-right">
+            <span class="track-duration">{{ track.duration }}</span>
+
+        {% if track.deezer_id %}
+        <div class="custom-player" data-deezer-id="{{ track.deezer_id }}">
+            <button class="play-btn"><i class="fas fa-play"></i></button>
+            <div class="progress-bar"><div class="progress"></div></div>
+        </div>
+        <a href="{{ track.deezer_link }}" target="_blank" class="deezer-btn">Deezer</a>
+        {% else %}
+        <span class="no-preview">🔇</span>
+        {% endif %}
+        </div>
+        </div>
+    {% empty %}
+        <p>No hay tracks disponibles.</p>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+document.querySelectorAll(".custom-player").forEach(player => {
+  const playBtn = player.querySelector(".play-btn");
+  const icon = playBtn.querySelector("i");
+  let audio = null;
+  let isPlaying = false;
+
+  playBtn.addEventListener("click", async () => {
+    if (!audio) {
+      const trackId = player.getAttribute("data-deezer-id");
+      const res = await fetch(`/collection/ajax/preview/${trackId}/`);
+      const data = await res.json();
+      if (data.preview) {
+        audio = new Audio(data.preview);
+        setupAudioEvents();
+        audio.play();
+      } else {
+        alert("No se pudo cargar la preview.");
+        return;
+      }
+    } else {
+      isPlaying ? audio.pause() : audio.play();
+    }
+  });
+
+  function setupAudioEvents() {
+    audio.addEventListener("play", () => {
+      isPlaying = true;
+      icon.classList.replace("fa-play", "fa-pause");
+    });
+
+    audio.addEventListener("pause", () => {
+      isPlaying = false;
+      icon.classList.replace("fa-pause", "fa-play");
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      player.querySelector(".progress").style.width = percent + "%";
+    });
+
+    audio.addEventListener("ended", () => {
+      isPlaying = false;
+      icon.classList.replace("fa-pause", "fa-play");
+      player.querySelector(".progress").style.width = "0%";
+    });
+  }
+});
+</script>
+
+{% endblock %}
