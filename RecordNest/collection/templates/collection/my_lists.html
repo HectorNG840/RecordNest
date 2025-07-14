@@ -11,7 +11,7 @@
 <div class="collection-grid">
   {% for lista in lists %}
     <div class="collection-card">
-      <a href="" class="collection-link">
+      <a href="{% url 'list_detail' lista.id %}" class="collection-link">
         <div class="image-container" style="background-image: url('{{ lista.records.first.cover_image|default:'/static/images/placeholder-image.png' }}');"></div>
         <div class="card-body">
           <h3 class="card-title">{{ lista.name }}</h3>

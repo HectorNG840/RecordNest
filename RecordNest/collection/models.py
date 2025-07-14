@@ -28,6 +28,15 @@ class UserRecord(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
     tracklist_JSON = models.JSONField(default=list, blank=True)
 
+class FavoriteRecord(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="favorite_record")
+    record_1 = models.ForeignKey(UserRecord, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    record_2 = models.ForeignKey(UserRecord, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    record_3 = models.ForeignKey(UserRecord, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+
+    def __str__(self):
+        return f"Favoritos de {self.user.username}"
+
 
 class Track(models.Model):
     record = models.ForeignKey(UserRecord, on_delete=models.CASCADE, related_name="tracks")
@@ -37,6 +46,7 @@ class Track(models.Model):
     preview_url = models.URLField(blank=True)
     deezer_link = models.URLField(blank=True)
     deezer_artists = models.TextField(blank=True)
+    deezer_id = models.CharField(max_length=50, blank=True, null=True) 
 
     def __str__(self):
         return f"{self.position} - {self.title}"
@@ -44,6 +54,7 @@ class Track(models.Model):
 class RecordList(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cover_image = models.ImageField(upload_to='record_lists/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     records = models.ManyToManyField("UserRecord", related_name="lists")
 

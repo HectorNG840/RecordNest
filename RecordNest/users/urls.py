@@ -8,5 +8,8 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(next_page="index"), name="logout"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
-    path('edit/', views.edit_profile, name='edit_profile'), 
+    path('edit/', views.edit_profile, name='edit_profile'),
+    path('favorites/select/<int:slot>/', views.select_favorite_record, name='select_favorite_record'),
+
+
 ]

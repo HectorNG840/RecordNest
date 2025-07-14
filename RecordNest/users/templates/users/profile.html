@@ -28,24 +28,40 @@
   <div class="section">
     <h3>Tus álbumes favoritos</h3>
     <div class="favorites-grid">
-      {% for album in favorite_albums %}
-        <div class="album-tile">
-          <img src="{{ album.image_url }}" alt="{{ album.title }}">
-        </div>
-      {% empty %}
-        {% for i in "123"|make_list %}
-        <div class="album-tile placeholder">+</div>
-        {% endfor %}
+      {% for record in favorite_records %}
+        <a class="favorite-link" href="{% url 'select_favorite_record' forloop.counter %}">
+          <div class="album-tile">
+            {% if record %}
+              <img src="{{ record.cover_image }}" alt="{{ record.title }}">
+            {% else %}
+              <div class="placeholder">+</div>
+            {% endif %}
+          </div>
+        </a>
       {% endfor %}
     </div>
+
   </div>
 
   <hr>
 
   <div class="section">
     <h3>Tus listas</h3>
-    <p>Aquí se mostrarán tus listas personalizadas próximamente.</p>
+
+    {% if user_lists %}
+      <div class="lists-grid">
+        {% for lista in user_lists %}
+          <div class="list-card">
+            
+            <h4>{{ lista.name }}</h4>
+            <p>{{ lista.description|default:"Sin descripción" }}</p>
+            <p><strong>{{ lista.records.count }}</strong> álbumes</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Aún no has creado ninguna lista.</p>
+    {% endif %}
   </div>
-</div>
 
 {% endblock %}

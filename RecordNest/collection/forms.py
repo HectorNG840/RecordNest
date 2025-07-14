@@ -6,6 +6,13 @@ class RecordListForm(forms.ModelForm):
         model = RecordList
         fields = ['name', 'description']
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Nombre de la lista'}),
-            'description': forms.Textarea(attrs={'placeholder': 'Descripción de la lista'})
+            'name': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Nombre de la lista'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-input',
+                'placeholder': 'Descripción de la lista',
+                'rows': 4
+            }),
         }

@@ -65,6 +65,45 @@ def get_preview_url_from_deezer(title, artist):
         return None
     
 
+def fetch_deezer_info(track, clean_artist):
+    title = track.get("title", "Unknown")
+    duration = track.get("duration", "")
+    duration_secs = None
+
+    if duration and ":" in duration:
+        try:
+            minutes, seconds = map(int, duration.split(":"))
+            duration_secs = minutes * 60 + seconds
+        except ValueError:
+            pass
+
+    deezer_info = None
+    results = get_deezer_results(title, clean_artist or "")
+    if results:
+        for res in results:
+            res_artist = res["artist"]["name"]
+            res_duration = res.get("duration")
+
+            if duration_secs and res_duration and abs(res_duration - duration_secs) <= 2:
+                if normalize_name(res_artist) == normalize_name(clean_artist):
+                    deezer_info = res
+                    break
+            elif not duration_secs and res.get("preview"):
+                if normalize_name(clean_artist) in normalize_name(res_artist):
+                    deezer_info = res
+                    break
+
+    return {
+        "position": track.get("position", ""),
+        "title": title,
+        "duration": duration,
+        "preview_url": deezer_info["preview"] if deezer_info else None,
+        "deezer_link": deezer_info["link"] if deezer_info else None,
+        "deezer_artists": [deezer_info["artist"]["name"]] if deezer_info else [],
+        "id": deezer_info["id"] if deezer_info else None
+    }
+    
+
 def get_deezer_results(track_title, artist_name):
 
     def search_on_deezer(query):
@@ -76,13 +115,13 @@ def get_deezer_results(track_title, artist_name):
             print(f"❌ Error en la búsqueda de Deezer: {e}")
             return []
 
-    # 1. Búsqueda con nombre original
+
     original_query = f"{track_title} {artist_name}"
     results = search_on_deezer(original_query)
     if results:
         return results
 
-    # 2. Reintento: reemplazar ' and ' por ' & '
+
     if " and " in artist_name.lower():
         alt_artist_name = artist_name.replace(" and ", " & ")
         alt_query = f"{track_title} {alt_artist_name}"
@@ -90,7 +129,6 @@ def get_deezer_results(track_title, artist_name):
         if results:
             return results
 
-    # 3. Reintento: reemplazar '&' por 'and' (por si acaso Deezer tiene el otro formato)
     if " & " in artist_name:
         alt_artist_name = artist_name.replace(" & ", " and ")
         alt_query = f"{track_title} {alt_artist_name}"

@@ -1,0 +1,36 @@
+{% extends "main/base.html" %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/favorite_records.css' %}">
+
+
+<h2 class="section-title">Selecciona tu disco favorito (Posición {{ slot }})</h2>
+
+<form method="POST">
+  {% csrf_token %}
+
+  <div class="record-grid">
+    {% for record in user_records %}
+      <label class="record-option">
+        <input type="radio" name="record_id" value="{{ record.id }}">
+        <div class="record-card">
+          <img src="{{ record.cover_image }}" alt="{{ record.title }}">
+          <div class="record-info">
+            <p class="title">{{ record.title|truncatechars:25 }}</p>
+          </div>
+        </div>
+      </label>
+    {% empty %}
+      <p>No tienes discos en tu colección.</p>
+    {% endfor %}
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-save">Guardar</button>
+    <a href="{% url 'profile' user.username %}" class="btn-cancel">← Volver al perfil</a>
+  </div>
+</form>
+
+{% endblock %}
+
+

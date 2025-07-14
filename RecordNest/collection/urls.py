@@ -15,6 +15,12 @@ path("lists/create/", views.create_list, name="create_list"),
 path('record/<int:record_id>/add_to_list/<int:list_id>/', views.add_record_to_list, name='add_record_to_list'),
 path('lists/<int:list_id>/delete/', views.delete_list, name='delete_list'),
 path('lists/<int:list_id>/edit/', views.edit_list, name='edit_list'),
+path('lists/<int:list_id>/', views.list_detail, name='list_detail'),
+path('lists/<int:list_id>/remove/<int:record_id>/', views.remove_record_from_list, name='remove_record_from_list'),
+path("ajax/preview/<int:track_id>/", views.fetch_preview_url, name="fetch_preview_url"),
+
+
+
 
 
 ]

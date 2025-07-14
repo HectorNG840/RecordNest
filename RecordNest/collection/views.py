@@ -5,6 +5,8 @@ from django.views.decorators.http import require_POST
 from .forms import RecordListForm
 from .models import UserRecord, Track, Tag, RecordList
 import json
+import requests
+from django.http import JsonResponse
 
 @login_required
 def add_to_collection(request):
@@ -45,7 +47,8 @@ def add_to_collection(request):
                     duration=t.get("duration", ""),
                     preview_url=t.get("preview_url", "") or "",
                     deezer_link=t.get("deezer_link", "") or "",
-                    deezer_artists=", ".join(t.get("deezer_artists", []))
+                    deezer_artists=", ".join(t.get("deezer_artists", [])),
+                    deezer_id=t.get("id", "")
                 )
                 print(f"✅ Track guardado: {t.get('title')}")
         except json.JSONDecodeError as e:
@@ -72,7 +75,7 @@ def my_collection(request):
         try:
             records = records.filter(tags__id=tag_id)
         except ValueError:
-            pass  # fallback seguro si el id no es válido
+            pass
         
     user_lists = RecordList.objects.filter(user=request.user)        
     user_tags = Tag.objects.filter(user=user)
@@ -94,7 +97,7 @@ def local_record_detail(request, record_id):
     return render(request, "records/local_record_detail.html", {
         "record": record,
         "tracks": tracks,
-        "user_tags": user_tags,  # 👈 pásalas al contexto
+        "user_tags": user_tags,
     })
 
 @login_required
@@ -104,20 +107,18 @@ def add_tag(request, record_id):
         tag_id = request.POST.get("existing_tag")
         new_tag_name = request.POST.get("new_tag")
 
-        # Si viene una nueva tag, créala
         if new_tag_name:
             tag, _ = Tag.objects.get_or_create(name=new_tag_name.strip(), user=request.user)
             record.tags.add(tag)
 
-        # Si seleccionó una existente (por ID)
         elif tag_id:
             try:
                 tag = Tag.objects.get(id=int(tag_id), user=request.user)
                 record.tags.add(tag)
             except (Tag.DoesNotExist, ValueError):
-                pass  # Evita crasheo si tag no existe o ID inválido
+                pass
 
-        # Si el record tenía solo "Sin etiquetas", elimínala
+        
         sin_etiquetas = Tag.objects.filter(name="Sin etiquetas", user=request.user).first()
         if sin_etiquetas in record.tags.all():
             record.tags.remove(sin_etiquetas)
@@ -131,7 +132,7 @@ def remove_tag(request, record_id, tag_id):
     tag = get_object_or_404(Tag, id=tag_id, user=request.user)
     record.tags.remove(tag)
 
-    # Si no quedan tags, añade "Sin etiquetas"
+    
     if record.tags.count() == 0:
         default_tag, _ = Tag.objects.get_or_create(name="Sin etiquetas", user=request.user)
         record.tags.add(default_tag)
@@ -181,5 +182,36 @@ def edit_list(request, list_id):
     else:
         form = RecordListForm(instance=record_list)
 
-    return render(request, 'collection/edit_list.html', {'form': form})
+    return render(request, 'collection/edit_list.html', {'list': record_list})
+
+@login_required
+def list_detail(request, list_id):
+    record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
+    records = record_list.records.all()
+    return render(request, 'collection/list_detail.html', {
+        'record_list': record_list,
+        'records': records
+    })
+
+@login_required
+def remove_record_from_list(request, list_id, record_id):
+    record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
+    record = get_object_or_404(UserRecord, id=record_id, user=request.user)
+
+    if request.method == "POST":
+        record_list.records.remove(record)
+        return redirect('list_detail', list_id=list_id)
+
+    return redirect('my_lists')
+
+
+def fetch_preview_url(request, track_id):
+    if request.method == "GET":
+        try:
+            response = requests.get(f"https://api.deezer.com/track/{track_id}")
+            data = response.json()
+            return JsonResponse({'preview': data.get("preview")})
+        except Exception:
+            return JsonResponse({'preview': None}, status=500)
+
 

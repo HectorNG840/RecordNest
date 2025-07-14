@@ -41,6 +41,11 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.favorite-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .profile-info p {
   margin: 0.4rem 0;
   font-size: 1rem;
@@ -210,3 +215,28 @@ body {
 .btn-save:hover {
   background: #8bcba0;
 }
+
+.lists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.list-card {
+  background-color: #2a2a2a;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 5px #000;
+  color: #ccc;
+}
+
+.list-card h4 {
+  color: #aed6b2;
+  margin-bottom: 0.5rem;
+}
+
+.list-card p {
+  margin: 0.3rem 0;
+}
+

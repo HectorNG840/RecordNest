@@ -1,13 +1,26 @@
 {% extends 'main/base.html' %}
 {% load static %}
 
+{% block title %}Editar Lista{% endblock %}
+
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/collection.css' %}">
+
 <div class="create-list-container">
-    <h2 class="section-title">Editar Lista</h2>
-    <form method="post" class="create-list-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn-primary">Guardar cambios</button>
-    </form>
+  <h2 class="section-title">Editar Lista</h2>
+
+  <form method="post" class="create-list-form">
+    {% csrf_token %}
+    
+    <label for="name" class="form-label">Nombre de la lista:</label>
+    <input type="text" id="name" name="name" class="form-input"
+        placeholder="{{ list.name }}" required>
+
+    <label for="description" class="form-label">Descripción de la lista:</label>
+    <textarea id="description" name="description" class="form-input" rows="4"
+        placeholder="{{ list.description }}"></textarea>
+
+    <button type="submit" class="btn-primary">Guardar cambios</button>
+  </form>
 </div>
 {% endblock %}
