@@ -51,17 +51,27 @@
     {% if user_lists %}
       <div class="lists-grid">
         {% for lista in user_lists %}
-          <div class="list-card">
-            
-            <h4>{{ lista.name }}</h4>
-            <p>{{ lista.description|default:"Sin descripción" }}</p>
-            <p><strong>{{ lista.records.count }}</strong> álbumes</p>
-          </div>
+          <a href="{% url 'list_detail' lista.id %}" class="list-card-link">
+            <div class="list-card">
+              {% if lista.cover_image %}
+                <img src="{{ lista.cover_image.url }}" alt="Portada" class="list-thumb">
+              {% else %}
+                <img src="{% static 'images/placeholder-image.png' %}" alt="Sin imagen" class="list-thumb">
+              {% endif %}
+
+              <div class="list-info">
+                <h4>{{ lista.name }}</h4>
+                <p class= "card-description">{{ lista.description|default:"Sin descripción" }}</p>
+                <p><strong>{{ lista.records.count }}</strong> álbumes</p>
+              </div>
+            </div>
+          </a>
         {% endfor %}
       </div>
     {% else %}
       <p>Aún no has creado ninguna lista.</p>
     {% endif %}
   </div>
+
 
 {% endblock %}

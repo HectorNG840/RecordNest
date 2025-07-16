@@ -147,7 +147,7 @@ def my_lists(request):
 @login_required
 def create_list(request):
     if request.method == 'POST':
-        form = RecordListForm(request.POST)
+        form = RecordListForm(request.POST, request.FILES)
         if form.is_valid():
             record_list = form.save(commit=False)
             record_list.user = request.user

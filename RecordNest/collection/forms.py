@@ -4,7 +4,7 @@ from .models import RecordList
 class RecordListForm(forms.ModelForm):
     class Meta:
         model = RecordList
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'cover_image']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-input',
@@ -14,5 +14,12 @@ class RecordListForm(forms.ModelForm):
                 'class': 'form-input',
                 'placeholder': 'Descripción de la lista',
                 'rows': 4
+            }),
+            'cover_image': forms.ClearableFileInput(attrs={
+                'class': 'form-input',
+                'accept': 'image/*'
+            }),
+            'is_public': forms.CheckboxInput(attrs={
+                'class': 'form-checkbox'
             }),
         }
