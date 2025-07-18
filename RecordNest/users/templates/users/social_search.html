@@ -16,7 +16,11 @@
     <div class="user-card-grid">
       {% for user in results %}
         <div class="user-card">
+        {% if user.profile_image %}
           <img src="{{ user.profile_image.url }}" alt="Avatar" class="user-avatar">
+        {% else %}
+          <img src="{% static 'profile_pics/default.png' %}" alt="Sin imagen" class="user-avatar">
+        {% endif %}
           <div class="user-info">
             <p class="user-name">{{ user.name }}</p>
             <p class="user-username">@{{ user.username }}</p>

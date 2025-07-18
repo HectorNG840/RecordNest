@@ -55,7 +55,11 @@
         <div class="user-section">
           <a href="{% url 'profile' user.username %}" class="profile-icon">
               <a href="{% url 'profile' user.username %}" class="profile-avatar-link">
-                <img src="{{ user.profile_image.url }}" alt="Perfil" class="profile-avatar">
+              {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="Foto de perfil" class="profile-avatar">
+              {% else %}
+                <img src="{% static 'profile_pics/default.png' %}" alt="Sin imagen" class="profile-avatar">
+              {% endif %}
             </a>
           </a>
           <form action="{% url 'logout' %}" method="post">
