@@ -5,22 +5,88 @@
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/collection.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 
-<div class="create-list-container">
+<div class="editListForm-container">
   <h2 class="section-title">Editar Lista</h2>
 
-  <form method="post" class="create-list-form">
+  <form method="post" enctype="multipart/form-data" class="create-list-form" id="editListForm">
     {% csrf_token %}
-    
+
     <label for="name" class="form-label">Nombre de la lista:</label>
     <input type="text" id="name" name="name" class="form-input"
-        placeholder="{{ list.name }}" required>
+           value="{{ form.name.value }}" required>
 
     <label for="description" class="form-label">Descripción de la lista:</label>
-    <textarea id="description" name="description" class="form-input" rows="4"
-        placeholder="{{ list.description }}"></textarea>
+    <textarea id="description" name="description" class="form-input" rows="4">{{ form.description.value }}</textarea>
+
+    <label class="form-label">Imagen de portada:</label>
+    <input type="file" id="imageInput" accept="image/*" class="form-input">
+
+    <div class="cropper-wrapper">
+      <img id="imagePreview" />
+    </div>
+
+    <input type="hidden" name="cropped_image_data" id="croppedImageInput">
+
+    <label for="is_public" class="form-label">¿Hacer esta lista pública?</label>
+    <input type="checkbox" id="is_public" name="is_public" class="form-checkbox"
+           {% if form.is_public.value %}checked{% endif %}>
 
     <button type="submit" class="btn-primary">Guardar cambios</button>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  let cropper;
+  const imageInput = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const croppedImageInput = document.getElementById('croppedImageInput');
+
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      imagePreview.src = reader.result;
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(imagePreview, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1,
+        ready() {
+          updateMiniPreview();
+        },
+        crop() {
+          updateMiniPreview();
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+
+  document.getElementById('editListForm').addEventListener('submit', function (e) {
+    if (cropper) {
+      e.preventDefault();
+
+      cropper.getCroppedCanvas().toBlob(function (blob) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          document.getElementById('croppedImageInput').value = reader.result;
+          requestAnimationFrame(() => document.getElementById('editListForm').submit());
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg');
+    }
+  });
+});
+</script>
 {% endblock %}

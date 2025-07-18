@@ -27,6 +27,7 @@
         <a href="{% url 'index' %}">Inicio</a>
         <a href="{% url 'my_collection'  %}">Colección</a>
         <a href="{% url 'my_lists'  %}">Listas</a>
+        <a href="{% url 'user_search' %}">Explorar usuarios</a>
 
         <div class="dropdown">
           <button class="dropbtn">
@@ -54,11 +55,11 @@
         <div class="user-section">
           <a href="{% url 'profile' user.username %}" class="profile-icon">
               <a href="{% url 'profile' user.username %}" class="profile-avatar-link">
-                {% if user.profile_image %}
-                  <img src="{{ user.profile_image.url }}" alt="Perfil" class="profile-avatar">
-                {% else %}
-                  <img src="{% static 'img/default-user.png' %}" alt="Perfil" class="profile-avatar">
-                {% endif %}
+              {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="Foto de perfil" class="profile-avatar">
+              {% else %}
+                <img src="{% static 'profile_pics/default.png' %}" alt="Sin imagen" class="profile-avatar">
+              {% endif %}
             </a>
           </a>
           <form action="{% url 'logout' %}" method="post">

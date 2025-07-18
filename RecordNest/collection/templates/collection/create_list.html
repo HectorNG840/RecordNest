@@ -9,13 +9,19 @@
 <div class="create-list-container">
     <h2 class="section-title">Crear nueva lista</h2>
 
-    <form method="post" class="create-list-form">
+    <form method="post" enctype="multipart/form-data" class="create-list-form">
         {% csrf_token %}
         <label for="name" class="form-label">Nombre de la lista:</label>
         <input type="text" id="name" name="name" class="form-input" placeholder="Ej. Favoritos 2024" required>
 
         <label for="description" class="form-label">Descripción de la lista:</label>
         <textarea id="description" name="description" class="form-input" rows="4" placeholder="Ej. Hits del año 2024"></textarea>
+
+        <label for="cover_image" class="form-label">Imagen de portada:</label>
+        <input type="file" id="cover_image" name="cover_image" class="form-input" accept="image/*">
+
+        <label for="is_public" class="form-label">¿Hacer esta lista pública?</label>
+        <input type="checkbox" id="is_public" name="is_public" class="form-checkbox">
 
         <button type="submit" class="btn-primary">Crear</button>
     </form>

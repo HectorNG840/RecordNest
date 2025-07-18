@@ -54,9 +54,10 @@ class Track(models.Model):
 class RecordList(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cover_image = models.ImageField(upload_to='record_lists/', blank=True, null=True)
+    cover_image = models.ImageField(upload_to='list_covers/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     records = models.ManyToManyField("UserRecord", related_name="lists")
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

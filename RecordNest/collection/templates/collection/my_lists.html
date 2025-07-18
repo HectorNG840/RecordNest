@@ -12,10 +12,15 @@
   {% for lista in lists %}
     <div class="collection-card">
       <a href="{% url 'list_detail' lista.id %}" class="collection-link">
-        <div class="image-container" style="background-image: url('{{ lista.records.first.cover_image|default:'/static/images/placeholder-image.png' }}');"></div>
+        <div class="image-container"
+            style="background-image: url('{% if lista.cover_image %}{{ lista.cover_image.url }}{% else %}/static/images/placeholder-image.png{% endif %}');">
+        </div>
         <div class="card-body">
           <h3 class="card-title">{{ lista.name }}</h3>
-          <p class="card-description">{{ lista.description|default:"Sin descripción" }}</p>
+          <p class="card-description">
+            {{ lista.description|default:"Sin descripción" }}
+          </p>
+          <p class="list-visibility">{{ lista.is_public|yesno:"Pública,Privada" }}</p>
         </div>
       </a>
       <div class="card-actions">

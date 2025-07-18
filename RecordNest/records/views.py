@@ -277,7 +277,7 @@ def record_detail(request):
             'released': release.get("released", "Desconocido"),
             'notes': release.get("notes", "No hay notas"),
             'barcode': ', '.join(i['value'] for i in release.get('identifiers', []) if i.get('type') == 'Barcode') or 'No disponible',
-            'tags': 'Sin etiquetas',
+            'tags': "",
             'genres': ', '.join(release.get('genres', [])) or 'Desconocido',
             'styles': ', '.join(release.get('styles', [])) or 'Desconocido',
             'labels': ', '.join(label.get('name') for label in release.get('labels', [])) or 'Desconocido',

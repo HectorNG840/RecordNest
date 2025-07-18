@@ -35,13 +35,10 @@ def fetch_cover_image(release, session):
     }
 
 def clean_bbcode(text: str) -> str:
-    # Reemplazar [b]...[/b] y similares → solo su contenido
     text = re.sub(r'\[/?[biu]\]', '', text)
 
-    # Reemplazar [a=storm (85)] → solo "storm (85)"
     text = re.sub(r'\[a=(.*?)\]', r'\1', text)
 
-    # Quitar otras etiquetas restantes que no tengan valor visible
     text = re.sub(r'\[/?[^\]]+\]', '', text)
 
     return text
