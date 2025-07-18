@@ -15,6 +15,8 @@ import base64
 from django.core.files.base import ContentFile
 from records.models import Record
 from collection.models import UserRecord, FavoriteRecord, RecordList
+from django.db.models import Q
+
 
 
 from .forms import CustomUserCreationForm, ProfileUpdateForm
@@ -49,11 +51,13 @@ def signup(request):
 def profile(request, username):
     user_profile = get_object_or_404(CustomUser, username=username)
 
-    # Crea favoritos si no existen aún
     favorite_obj, _ = FavoriteRecord.objects.get_or_create(user=user_profile)
-    user_lists = RecordList.objects.filter(user=user_profile)
 
-    # Lista ordenada para el template
+    if request.user == user_profile:
+        user_lists = RecordList.objects.filter(user=user_profile)
+    else:
+        user_lists = RecordList.objects.filter(user=user_profile, is_public=True)
+
     favorite_records = [
         favorite_obj.record_1,
         favorite_obj.record_2,
@@ -61,7 +65,7 @@ def profile(request, username):
     ]
 
     return render(request, "users/profile.html", {
-        "user": request.user,
+        "viewer": request.user,
         "profile_user": user_profile,
         "favorite_records": favorite_records,
         "user_lists": user_lists,
@@ -140,4 +144,19 @@ def select_favorite_record(request, slot):
     return render(request, 'users/select_favourite_record.html', {
         'slot': slot,
         'user_records': user_records
+    })
+
+@login_required
+def user_search(request):
+    query = request.GET.get("q", "")
+    users = []
+
+    if query:
+        users = CustomUser.objects.filter(
+            Q(username__icontains=query) | Q(name__icontains=query)
+        ).exclude(id=request.user.id)
+
+    return render(request, "users/social_search.html", {
+        "query": query,
+        "results": users
     })

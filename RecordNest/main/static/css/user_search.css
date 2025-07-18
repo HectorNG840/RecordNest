@@ -1,0 +1,111 @@
+body {
+  background-color: #1b1b1b;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+}
+.user-search-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.user-search-container h1 {
+  color: #aed6b2;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-search-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.user-search-form input[type="text"] {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border-radius: 20px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: #fff;
+  flex: 1;
+}
+
+.user-search-form button {
+  background-color: #aed6b2;
+  color: #111;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.user-search-form button:hover {
+  background-color: #88b792;
+}
+
+.user-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background-color: #2a2a2a;
+  padding: 1.2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.user-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #aed6b2;
+  background-color: #1b1b1b;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  color: #fff;
+  font-weight: bold;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.user-username {
+  color: #ccc;
+  margin: 0.2rem 0 0.8rem 0;
+  font-size: 0.95rem;
+}
+
+.profile-btn {
+  display: inline-block;
+  background-color: #aed6b2;
+  color: #111;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.profile-btn:hover {
+  background-color: #88b792;
+}
+
+.no-results {
+  color: #bbb;
+  margin-top: 1rem;
+}

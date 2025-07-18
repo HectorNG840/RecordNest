@@ -6,30 +6,38 @@
 
 <div class="profile-container">
   <div class="profile-header">
-    {% if user.profile_image %}
-      <img src="{{ user.profile_image.url }}" alt="Foto de perfil" class="profile-pic">
-    {% else %}
-      <img src="{% static 'img/default-user.png' %}" alt="Foto de perfil" class="profile-pic">
-    {% endif %}
-
+    <img src="{{ profile_user.profile_image.url }}" alt="Foto de perfil" class="profile-pic">
     <div class="profile-details">
-      <h2 class="profile-name">{{ user.username }}</h2>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Fecha de registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
-      {% if user.bio %}
-        <p><strong>Biografía:</strong> {{ user.bio }}</p>
+      <h2 class="profile-name">{{ profile_user.username }}</h2>
+      {% if profile_user.name %}
+        <p><strong>Nombre: </strong>{{ profile_user.name }}</p>
       {% endif %}
-      <a href="{% url 'edit_profile' %}" class="edit-btn">Editar perfil</a>
+      {% if viewer == profile_user %}
+        <p><strong>Email:</strong> {{ profile_user.email }}</p>
+      {% endif %}
+      <p><strong>Fecha de registro:</strong> {{ profile_user.date_joined|date:"d/m/Y" }}</p>
+      {% if profile_user.bio %}
+        <p><strong>Biografía:</strong> {{ profile_user.bio }}</p>
+      {% endif %}
+      {% if viewer == profile_user %}
+        <a href="{% url 'edit_profile' %}" class="edit-btn">Editar perfil</a>
+      {% endif %}
     </div>
   </div>
 
   <hr>
 
   <div class="section">
-    <h3>Tus álbumes favoritos</h3>
+    {% if viewer == profile_user %}
+      <h3>Tus álbumes favoritos</h3>
+    {% else %}
+      <h3>Álbumes favoritos de {{ profile_user.username }}</h3>
+    {% endif %}
     <div class="favorites-grid">
       {% for record in favorite_records %}
-        <a class="favorite-link" href="{% url 'select_favorite_record' forloop.counter %}">
+        {% if viewer == profile_user %}
+          <a class="favorite-link" href="{% url 'select_favorite_record' forloop.counter %}">
+        {% endif %}
           <div class="album-tile">
             {% if record %}
               <img src="{{ record.cover_image }}" alt="{{ record.title }}">
@@ -46,7 +54,11 @@
   <hr>
 
   <div class="section">
-    <h3>Tus listas</h3>
+    {% if viewer == profile_user %}
+      <h3>Tus listas</h3>
+    {% else %}
+      <h3>Listas de {{ profile_user.username }}</h3>
+    {% endif %}
 
     {% if user_lists %}
       <div class="lists-grid">
@@ -68,9 +80,13 @@
           </a>
         {% endfor %}
       </div>
-    {% else %}
-      <p>Aún no has creado ninguna lista.</p>
-    {% endif %}
+      {% else %}
+        {% if viewer == profile_user %}
+          <p>Aún no has creado ninguna lista.</p>
+        {% else %}
+          <p>Este usuario no tiene listas públicas.</p>
+        {% endif %}
+      {% endif %}
   </div>
 
 

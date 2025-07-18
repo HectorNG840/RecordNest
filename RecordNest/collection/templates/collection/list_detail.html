@@ -6,8 +6,19 @@
 <link rel="stylesheet" href="{% static 'css/collection.css' %}">
 
 <div class="list-detail-container">
-  <h2 class="collection-title">{{ record_list.name }}</h2>
-  <p class="list-description">{{ record_list.description }}</p>
+
+  <div class="list-header">
+    {% if record_list.cover_image %}
+      <img src="{{ record_list.cover_image.url }}" alt="Portada de la lista" class="list-cover">
+    {% else %}
+      <img src="{% static 'images/placeholder-image.png' %}" alt="Sin portada" class="list-cover">
+    {% endif %}
+
+    <div class="list-header-info">
+      <h2 class="collection-title">{{ record_list.name }}</h2>
+      <p class="list-description">{{ record_list.description }}</p>
+    </div>
+  </div>
 
   {% if records %}
     <div class="record-list">
@@ -21,16 +32,18 @@
             <p><strong>Géneros:</strong> {{ record.genres }}</p>
             <p><strong>Formato:</strong> {{ record.formats }}</p>
           </div>
+          {% if user == record_list.user %}
           <form method="post" action="{% url 'remove_record_from_list' record_list.id record.id %}">
             {% csrf_token %}
             <button type="submit" class="btn-remove-record">Quitar</button>
           </form>
-
+          {%endif%}
         </div>
       {% endfor %}
     </div>
   {% else %}
     <p>No hay discos en esta lista.</p>
   {% endif %}
+
 </div>
 {% endblock %}

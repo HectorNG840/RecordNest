@@ -1,0 +1,32 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/user_search.css' %}">
+
+<section class="user-search-container">
+  <h1>Buscar otros usuarios</h1>
+
+  <form method="get" action="{% url 'user_search' %}" class="user-search-form">
+    <input type="text" name="q" placeholder="Buscar por nombre o usuario" value="{{ query }}">
+    <button type="submit">Buscar</button>
+  </form>
+
+  {% if results %}
+    <div class="user-card-grid">
+      {% for user in results %}
+        <div class="user-card">
+          <img src="{{ user.profile_image.url }}" alt="Avatar" class="user-avatar">
+          <div class="user-info">
+            <p class="user-name">{{ user.name }}</p>
+            <p class="user-username">@{{ user.username }}</p>
+            <a href="{% url 'profile' user.username %}" class="profile-btn">Ver perfil</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% elif query %}
+    <p class="no-results">No se encontraron usuarios para "<strong>{{ query }}</strong>".</p>
+  {% endif %}
+</section>
+{% endblock %}
