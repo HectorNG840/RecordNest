@@ -8,17 +8,39 @@
 
 <h2 class="collection-title">Mi Colección</h2>
 
-<div class="tag-filter-container">
-    <form method="get" class="tag-filter-form">
-        <label for="tag" class="tag-filter-label">Filtrar por tag:</label>
-        <select name="tag" id="tag" class="tag-filter-select" onchange="this.form.submit()">
-            <option value="">-- Todas --</option>
-            {% for tag in tags %}
-                <option value="{{ tag.id }}" {% if tag.id == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
-            {% endfor %}
-        </select>
+<div class="tag-container-box">
+  <div class="tag-controls">
+    <form method="get" action="{% url 'my_collection' %}">
+      <label for="tag" class="tag-filter-label">Filtrar por tag:</label>
+      <select name="tag" id="tag" class="tag-filter-select" onchange="this.form.submit()">
+        <option value="">-- Todas --</option>
+        {% for tag in tags %}
+          <option value="{{ tag.id }}" {% if tag.id == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
+        {% endfor %}
+      </select>
     </form>
+  </div>
+
+  <div class="tag-list-title">Tus etiquetas:</div>
+  <div class="tag-list">
+    {% for tag in tags %}
+      <div class="tag-item" data-tag-id="{{ tag.id }}">
+        <span class="tag-name">{{ tag.name }}</span>
+        <button class="delete-tag-btn" data-tag-id="{{ tag.id }}" title="Eliminar etiqueta">×</button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'add_tag_to_collection' %}" class="new-tag-form">
+    {% csrf_token %}
+    <label for="new_tag_name">Crear nueva etiqueta:</label>
+    <div class="new-tag-input-group">
+      <input type="text" id="new_tag_name" name="new_tag_name" placeholder="Nombre de etiqueta..." required>
+      <button type="submit">Añadir</button>
+    </div>
+  </form>
 </div>
+
 
 <div class="collection-grid">
   {% for record in records %}
