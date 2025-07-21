@@ -28,16 +28,7 @@
         <a href="{% url 'my_collection'  %}">Colección</a>
         <a href="{% url 'my_lists'  %}">Listas</a>
         <a href="{% url 'user_search' %}">Explorar usuarios</a>
-
-        <div class="dropdown">
-          <button class="dropbtn">
-            Más <i class="fas fa-caret-down"></i>
-          </button>
-          <div class="dropdown-content">
-            <a href="#">Sobre nosotros</a>
-            <a href="#">Contacto</a>
-          </div>
-        </div>
+        <a href="{% url 'about' %}">Sobre nosotros</a>
       </nav>
 
       <!-- Right-side: Search + User -->
@@ -86,9 +77,9 @@
 
 
     {% if messages %}
-      <div class="messages">
+      <div class="flash-messages">
         {% for message in messages %}
-          <div class="message {{ message.tags }}">
+          <div class="flash-message {{ message.tags }}">
             {{ message }}
           </div>
         {% endfor %}
@@ -114,7 +105,7 @@
         <div class="footer-column">
           <h3>Contacto</h3>
           <p><i class="fas fa-map-marker-alt"></i> Sevilla, España</p>
-          <p><i class="fas fa-envelope"></i> recordnest.app@gmail.com</p>
+          <p><a href="mailto:recordnest.app@gmail.com"><i class="fas fa-envelope"></i> recordnest.app@gmail.com</a></p>
           <p><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></p>
           <p><a href="#"><i class="fas fa-file-alt"></i> Términos y condiciones</a></p>
         </div>

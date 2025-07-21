@@ -6,14 +6,13 @@ body {
   padding: 0;
 }
 
-/* CONTENEDOR */
 .record-container {
   padding: 2rem;
   max-width: 1200px;
   margin: auto;
 }
 
-/* CABECERA DEL ARTISTA */
+
 .artist-header {
   display: flex;
   flex-wrap: wrap;
@@ -47,7 +46,7 @@ body {
   max-width: 800px;
 }
 
-/* SELECTOR DE MODO (tabs) */
+
 .mode-toggle {
   display: flex;
   gap: 1rem;
@@ -74,7 +73,7 @@ body {
   color: #111;
 }
 
-/* TÍTULO SECCIÓN */
+
 h2 {
   font-size: 1.8rem;
   color: #aed6b2;
@@ -82,7 +81,7 @@ h2 {
   margin-bottom: 2rem;
 }
 
-/* TARJETAS DE DISCO */
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -90,7 +89,7 @@ h2 {
   padding-bottom: 2rem;
 }
 
-/* CARD */
+
 .card {
   background-color: #2a2a2a;
   border-radius: 12px;
@@ -145,7 +144,7 @@ h2 {
   color: #fff;
 }
 
-/* LINK DE LA CARD */
+
 .card-link {
   text-decoration: none;
   color: inherit;
@@ -156,7 +155,7 @@ h2 {
   text-decoration: none;
 }
 
-/* PAGINACIÓN */
+
 .pagination {
   display: flex;
   justify-content: center;

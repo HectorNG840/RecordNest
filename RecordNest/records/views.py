@@ -180,7 +180,6 @@ def record_detail(request):
     session = get_oauth_session()
 
     try:
-        # Buscar release por master, release o por query
         if master_id:
             d = get_discogs_client()
             master = d.master(master_id)
@@ -265,7 +264,6 @@ def record_detail(request):
                 "id": deezer_info.get("deezer_id") if deezer_info else None
             })
 
-        # Ordenar por posición
         tracklist.sort(key=lambda track: track_position_key(track.get("position", "")))
 
         record = {

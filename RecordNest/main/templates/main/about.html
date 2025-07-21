@@ -1,0 +1,32 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Sobre Nosotros{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+
+<div class="about-container">
+  <h2 class="about-title">Sobre Nosotros</h2>
+
+  <p class="about-text">
+    Este proyecto es un <strong>Trabajo de Fin de Grado</strong> para el Grado en Ingeniería del Software 
+    de la <strong>Universidad de Sevilla</strong> desarrollado por Héctor Noguera González
+  </p>
+
+  <p class="about-text">
+    Su objetivo es ofrecer una aplicación web que permita a los usuarios organizar, explorar y 
+    mantener su propia colección musical de manera sencilla e intuitiva.
+  </p>
+
+  <p class="about-text">
+    Todos los datos de álbumes, portadas, géneros, artistas y metadatos han sido obtenidos gracias 
+    a la <strong>API de Discogs</strong> y la <strong>API de Deezer</strong>.
+  </p>
+
+  <p class="about-text">
+    Agradezco a estas plataformas por facilitar el acceso a sus servicios y contribuir 
+    al desarrollo de este proyecto.
+  </p>
+</div>
+{% endblock %}

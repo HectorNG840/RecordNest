@@ -8,38 +8,67 @@
 
 <h2 class="collection-title">Mi Colección</h2>
 
-<div class="tag-container-box">
-  <div class="tag-controls">
-    <form method="get" action="{% url 'my_collection' %}">
-      <label for="tag" class="tag-filter-label">Filtrar por tag:</label>
-      <select name="tag" id="tag" class="tag-filter-select" onchange="this.form.submit()">
+
+<div class="tag-controls-wrapper">
+  <div class="filter-wrapper">
+    <form method="get" action="{% url 'my_collection' %}" class="filter-form">
+        <label for="tag">Tag:</label>
+        <select name="tag" id="tag" onchange="this.form.submit()">
         <option value="">-- Todas --</option>
         {% for tag in tags %}
-          <option value="{{ tag.id }}" {% if tag.id == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
+            <option value="{{ tag.id }}" {% if tag.id == selected_tag %}selected{% endif %}>{{ tag.name }}</option>
         {% endfor %}
-      </select>
+        </select>
+
+        <label for="sort_by">Ordenar:</label>
+        <select name="sort" id="sort" onchange="this.form.submit()">
+        <option value="added" {% if selected_sort == 'added' %}selected{% endif %}>Fecha de añadido</option>
+        <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Título</option>
+        <option value="year" {% if selected_sort == 'year' %}selected{% endif %}>Año</option>
+        <option value="artists" {% if selected_sort == 'artists' %}selected{% endif %}>Artista</option>
+
+        </select>
+
+        <span class="sort-icon">⇅</span>
+
+        <select name="order" id="order" onchange="this.form.submit()">
+        <option value="asc" {% if selected_order == 'asc' %}selected{% endif %}>Asc</option>
+        <option value="desc" {% if selected_order == 'desc' %}selected{% endif %}>Desc</option>
+
+        </select>
     </form>
   </div>
 
-  <div class="tag-list-title">Tus etiquetas:</div>
-  <div class="tag-list">
-    {% for tag in tags %}
-      <div class="tag-item" data-tag-id="{{ tag.id }}">
-        <span class="tag-name">{{ tag.name }}</span>
-        <button class="delete-tag-btn" data-tag-id="{{ tag.id }}" title="Eliminar etiqueta">×</button>
-      </div>
-    {% endfor %}
-  </div>
+    <div class="tag-control-right">
+        <div class="tag-list-section">
+        <span class="tag-list-title">Tus etiquetas:</span>
+        <div class="tag-list-scroll">
+            <div class="tag-list">
+            {% for tag in tags %}
+            <div class="tag-item" data-tag-id="{{ tag.id }}">
+                <span class="tag-name">{{ tag.name }}</span>
+                <form method="post" action="{% url 'delete_tag' tag.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="delete-tag-btn" title="Eliminar etiqueta">×</button>
+                </form>
+            </div>
+            {% endfor %}
+            </div>
+        </div>
+        </div>
 
-  <form method="post" action="{% url 'add_tag_to_collection' %}" class="new-tag-form">
-    {% csrf_token %}
-    <label for="new_tag_name">Crear nueva etiqueta:</label>
-    <div class="new-tag-input-group">
-      <input type="text" id="new_tag_name" name="new_tag_name" placeholder="Nombre de etiqueta..." required>
-      <button type="submit">Añadir</button>
+        <form method="post" action="{% url 'add_tag_to_collection' %}" class="new-tag-form">
+        {% csrf_token %}
+        <input type="text" id="new_tag_name" name="new_tag_name" placeholder="Nombre de etiqueta..." required>
+        <button type="submit">Añadir</button>
+        </form>
     </div>
-  </form>
+
 </div>
+
+
+
+
 
 
 <div class="collection-grid">
@@ -143,6 +172,9 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.dropdown-options').forEach(el => el.style.display = 'none');
 });
 </script>
+
+
+
 
 {% endblock %}
 

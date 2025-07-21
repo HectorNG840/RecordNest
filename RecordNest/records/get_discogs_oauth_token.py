@@ -8,19 +8,16 @@ CONSUMER_KEY = 'RGqvUKwokTQuBwTPXLHE'
 CONSUMER_SECRET = 'AtLdLqCHnURhKdnnPxxsvEOvhfPGpTUj'
 CALLBACK_URL = 'http://localhost/callback'
 
-# Paso 1: obtener request token
 oauth = OAuth1Session(CONSUMER_KEY, client_secret=CONSUMER_SECRET, callback_uri=CALLBACK_URL)
 fetch_response = oauth.fetch_request_token(REQUEST_TOKEN_URL)
 resource_owner_key = fetch_response.get('oauth_token')
 resource_owner_secret = fetch_response.get('oauth_token_secret')
 
-# Paso 2: redirigir usuario a autorizar
-print("🔗 Autoriza la app aquí:")
+print("Autoriza la app aquí:")
 print(f"{AUTHORIZE_URL}?oauth_token={resource_owner_key}")
 
-verifier = input("📥 Pega el oauth_verifier: ")
+verifier = input("Pega el oauth_verifier: ")
 
-# Paso 3: intercambiar por access token
 oauth = OAuth1Session(
     CONSUMER_KEY,
     client_secret=CONSUMER_SECRET,

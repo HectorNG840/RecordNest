@@ -1,0 +1,27 @@
+body {
+  background-color: #1b1b1b;
+  color: #e0e0e0;
+  font-family: "Segoe UI", sans-serif;
+}
+.about-container {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.3);
+}
+
+.about-title {
+  font-size: 2rem;
+  color: #b2f1c2;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.about-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #ddd;
+  margin-bottom: 1rem;
+}

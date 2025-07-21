@@ -73,6 +73,9 @@ def delete_from_collection(request, record_id):
 def my_collection(request):
     user = request.user
     tag_id = request.GET.get("tag")
+    sort = request.GET.get("sort", "added_at")
+    order = request.GET.get("order", "desc") 
+
     records = UserRecord.objects.filter(user=user)
 
     if tag_id:
@@ -80,15 +83,24 @@ def my_collection(request):
             records = records.filter(tags__id=tag_id)
         except ValueError:
             pass
-        
-    user_lists = RecordList.objects.filter(user=request.user)        
+
+    if sort in ['title', 'artists', 'year', 'added_at']:
+        sort_field = sort if order == 'asc' else f'-{sort}'
+        records = records.order_by(sort_field)
+
+    user_lists = RecordList.objects.filter(user=user)
     user_tags = Tag.objects.filter(user=user)
+
     return render(request, "collection/collection_list.html", {
         "records": records,
         "tags": user_tags,
         "selected_tag": int(tag_id) if tag_id else None,
-        'user_lists': user_lists,
+        "selected_sort": sort,
+        "selected_order": order,
+        "user_lists": user_lists,
     })
+
+
 
 @login_required
 def local_record_detail(request, record_id):
@@ -143,10 +155,12 @@ def delete_tag(request, tag_id):
     tag = get_object_or_404(Tag, id=tag_id, user=request.user)
 
     if tag.records.exists():
-        return JsonResponse({"error": "No puedes eliminar esta etiqueta porque aún está en uso."}, status=400)
+        from django.contrib import messages
+        messages.error(request, "No puedes eliminar esta etiqueta porque está en uso.")
+        return redirect('my_collection')
 
     tag.delete()
-    return JsonResponse({"success": True})
+    return redirect('my_collection')
 
 
 @login_required
@@ -189,7 +203,7 @@ def add_record_to_list(request, record_id, list_id):
 def delete_list(request, list_id):
     record_list = get_object_or_404(RecordList, id=list_id, user=request.user)
     record_list.delete()
-    return redirect('my_lists')  # Ajusta al nombre de tu URL
+    return redirect('my_lists')
 
 
 @login_required
@@ -200,10 +214,9 @@ def edit_list(request, list_id):
         form = RecordListForm(request.POST, request.FILES, instance=record_list)
 
         if form.is_valid():
-            # Guardar los datos del formulario
+
             record_list = form.save(commit=False)
 
-            # Verificar si se recibió imagen recortada
             cropped_data = request.POST.get('cropped_image_data')
             if cropped_data and cropped_data.startswith('data:image'):
                 format, imgstr = cropped_data.split(';base64,')
@@ -230,7 +243,6 @@ def edit_list(request, list_id):
 def list_detail(request, list_id):
     record_list = get_object_or_404(RecordList, id=list_id)
 
-    # ✅ Bloquea si es privada y no es del dueño
     if not record_list.is_public and record_list.user != request.user:
         raise PermissionDenied("No tienes permiso para ver esta lista.")
 

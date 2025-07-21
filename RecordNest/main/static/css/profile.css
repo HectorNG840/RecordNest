@@ -167,7 +167,7 @@ body {
   color: #fff;
 }
 
-/* Listas futuras */
+
 .section p {
   color: #aaa;
   font-style: italic;
@@ -234,7 +234,7 @@ body {
 
 .list-card h4 {
   color: #aed6b2;
-  margin: 0; /* <-- elimina margen inferior */
+  margin: 0;
 }
 
 
@@ -249,7 +249,7 @@ body {
 
 .list-info {
   flex: 1;
-  min-width: 0; /* crucial */
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }

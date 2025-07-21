@@ -35,7 +35,7 @@ header {
   transform: scale(1.05);
 }
 
-/* Nav Links */
+
 .nav-links {
   display: flex;
   justify-content: center;
@@ -59,7 +59,7 @@ header {
   color: #aed6b2;
 }
 
-/* Dropdown */
+
 .dropdown {
   position: relative;
   display: inline-block;
@@ -102,7 +102,7 @@ header {
   background-color: #444;
 }
 
-/* User area */
+
 .user-section {
   display: flex;
   gap: 1rem;
@@ -117,7 +117,7 @@ header {
 .username-link:hover {
   color: #aed6b2;
 }
-/* Logout button */
+
 .logout-button {
   background: none;
   border: none;
@@ -132,7 +132,7 @@ header {
   color: #aed6b2;
 }
 
-/* Search bar */
+
 .search-bar {
   background-color: #333;
   display: flex;
@@ -170,7 +170,7 @@ header {
   background-color: #88b792;
 }
 
-/* Grid content */
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -201,7 +201,7 @@ header {
   font-size: 0.8em;
 }
 
-/* Pagination */
+
 .pagination {
   text-align: center;
   margin-top: 20px;
@@ -222,9 +222,9 @@ header {
   font-weight: bold;
 }
 
-/* Footer */
+
 footer {
-  background-color: #181716; /* Más oscuro que el main */
+  background-color: #181716;
   padding: 3rem 2rem;
   margin-top: 4rem;
   border-top: 1px solid #333;
@@ -290,7 +290,7 @@ footer {
   margin-top: 2rem;
 }
 
-/* Responsive */
+
 @media screen and (max-width: 768px) {
   .navbar-container {
     grid-template-columns: 1fr;
@@ -335,7 +335,7 @@ footer {
   padding: 2rem;
 }
 
-/* Hero Section */
+
 .hero {
   background-color: #1b1b1b;
   padding: 4rem 2rem 2rem;
@@ -369,14 +369,14 @@ footer {
   background-color: #7fa282;
 }
 
-/* Features grid */
+
 .features {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
   gap: 2rem;
   padding: 3rem 2rem 2rem;
-  background-color: #1c1c1c; /* contraste con footer */
+  background-color: #1c1c1c;
   border-top: 2px solid #222;
 }
 
@@ -424,6 +424,7 @@ footer {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease-in-out;
+  pointer-events: auto;
 }
 
 .account-btn:hover {
@@ -434,7 +435,7 @@ footer {
 .account-dropdown {
   display: none;
   position: absolute;
-  top: 110%;
+  top: 100%;
   right: 0;
   background-color: #252321;
   border: 1px solid #444;
@@ -443,6 +444,7 @@ footer {
   z-index: 1000;
   min-width: 120px;
   padding: 0.5rem 0;
+  pointer-events: auto;
 }
 
 .account-dropdown a {
@@ -476,3 +478,36 @@ footer {
   align-items: center;
   margin-right: 0.5rem;
 }
+
+.flash-messages {
+  padding: 1rem 2rem;
+  margin: 1rem auto;
+  max-width: 1000px;
+}
+
+.flash-message {
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.flash-message.error {
+  background-color: #3a1e1e;
+  color: #ffb2b2;
+  border: 1px solid #822;
+}
+
+.flash-message.success {
+  background-color: #1e3a2a;
+  color: #b2ffcf;
+  border: 1px solid #2a5;
+}
+
+.flash-message.info {
+  background-color: #2a2a3a;
+  color: #c4c4ff;
+  border: 1px solid #667;
+}
+

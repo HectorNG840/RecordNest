@@ -5,9 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 import re
 
 def fetch_cover_image(release, session):
-    cover_image = release.get("thumb")  # fallback por defecto
+    cover_image = release.get("thumb")
     resource_url = release.get("resource_url")
-    release_type = release.get("type", "")  # master o release
+    release_type = release.get("type", "")
     unique_id = release.get("id")
 
     try:

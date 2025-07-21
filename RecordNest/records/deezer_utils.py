@@ -16,10 +16,10 @@ def normalize(name):
 def normalize_name(name):
 
     name = name.lower()
-    name = name.replace(" and ", " & ")  # cambia and por &
+    name = name.replace(" and ", " & ")
     name = name.replace("feat.", "")
     name = name.replace("featuring", "")
-    name = re.sub(r'\s+', ' ', name)  # quita espacios múltiples
+    name = re.sub(r'\s+', ' ', name)
     return name.strip()
 
 

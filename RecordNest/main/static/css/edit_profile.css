@@ -40,7 +40,7 @@ body {
   background-color: #1e1e1e;
   color: #fff;
   font-size: 0.95rem;
-  resize: none; /* no agrandable */
+  resize: none;
 }
 
 .form-container input[type="text"]:focus,
