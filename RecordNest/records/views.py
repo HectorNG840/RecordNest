@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests_oauthlib import OAuth1Session
 from django.conf import settings
 from math import ceil
+from collection.models import Wishlist
 import time
 import requests
 from discogs_client.exceptions import HTTPError
@@ -170,6 +171,7 @@ def track_position_key(pos):
         return (ord(letter), int(number))
     return (float('inf'), float('inf'))
 
+
 def record_detail(request):
     master_id = request.GET.get("master_id")
     release_id = request.GET.get("release_id")
@@ -180,6 +182,7 @@ def record_detail(request):
     session = get_oauth_session()
 
     try:
+        # Comprobar si el disco tiene master_id o release_id
         if master_id:
             d = get_discogs_client()
             master = d.master(master_id)
@@ -205,7 +208,10 @@ def record_detail(request):
             release.refresh()
             release = release.data
 
-        # Fallbacks
+            master_id = master.id  # Obtener master_id si no estaba presente
+            release_id = release.get("id")  # Asegurarse de obtener el release_id
+
+        # Validación de fallback para otros campos
         if not clean_artist:
             artist_data = release.get("artists", [])
             clean_artist = re.sub(r"\s*\(\d+\)$", "", artist_data[0].get("name", "").strip()) if artist_data else "Unknown Artist"
@@ -266,6 +272,7 @@ def record_detail(request):
 
         tracklist.sort(key=lambda track: track_position_key(track.get("position", "")))
 
+        # Datos del disco para pasar a la plantilla
         record = {
             'title': release.get("title", "Sin título"),
             'artists': ', '.join(a['name'] for a in release.get("artists", [])) or "Desconocido",
@@ -282,14 +289,35 @@ def record_detail(request):
             'formats': ', '.join(fmt.get('name') for fmt in release.get('formats', [])) or 'Desconocido',
             'tracklist': tracklist,
             'versions': [],
-            'master_id': master_id or release.get("master_id")
+            'master_id': master_id,  # Pasamos master_id aquí
+            'release_id': release_id or release.get("id"),  # Asegurarse de pasar el release_id
+            'record_id': release_id or release.get("id")
         }
 
-        return render(request, 'records/record_detail.html', {'record': record})
+        # Verificar si el disco está en la wishlist
+        is_in_wishlist = False
+        if request.user.is_authenticated:
+            print(f"Verificando si el disco con master_id: {master_id} o release_id: {release_id} está en la wishlist.")
+            is_in_wishlist = Wishlist.objects.filter(user=request.user, discogs_master_id=master_id).exists() or \
+                             Wishlist.objects.filter(user=request.user, discogs_release_id=release_id).exists()
+
+            print(f"¿Está en la wishlist? {is_in_wishlist}")
+
+        return render(request, 'records/record_detail.html', {'record': record, 'is_in_wishlist': is_in_wishlist,})
 
     except Exception as e:
         print(f"❌ Error en record_detail: {e}")
         return render(request, 'records/record_detail.html', {'record': {}, 'error': str(e)})
+
+
+
+
+
+
+
+
+
+
 
 
 

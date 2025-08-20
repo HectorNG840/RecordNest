@@ -1,0 +1,83 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/stats.css' %}">
+<div class="main-content">
+    <h1 class="stats-title">Top 10 Discos más deseados</h1>
+
+    <div class="most-wished-grid">
+      {% for record in most_wished %}
+        <div class="record-card">
+          <div class="record-card-inner">
+            <div class="image-container">
+              <!-- Mostrar la imagen pequeña -->
+              <img src="{{ record.image_url|default:'/static/images/placeholder-image.png' }}" alt="{{ record.title }}">
+            </div>
+            <div class="record-info">
+              <h3>{{ record.title }}</h3>
+              <p><strong>Artista:</strong> {{ record.artists }}</p>
+              <p><strong>Total en wishlists:</strong> {{ record.total_wished }}</p>
+              <a href="{% url 'record_detail' %}?master_id={{ record.master_id }}" class="cta-button-small">Ver detalle</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <h2 class="chart-title">Visualización de popularidad</h2>
+    <canvas id="mostWishedChart" width="600" height="400"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('mostWishedChart').getContext('2d');
+const mostWishedChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for record in most_wished %}"{{ record.title|escapejs }}",{% endfor %}],
+        datasets: [{
+            label: 'Cantidad de wishlists',
+            data: [{% for record in most_wished %}{{ record.total_wished }},{% endfor %}],
+            backgroundColor: 'rgba(174, 214, 178, 0.8)',
+            borderColor: 'rgba(174, 214, 178, 1)',
+            borderWidth: 1,
+            borderRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: '#252321',
+                titleColor: '#aed6b2',
+                bodyColor: '#fff'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#fff'
+                },
+                grid: {
+                    color: '#333'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#fff'
+                },
+                grid: {
+                    color: '#333'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

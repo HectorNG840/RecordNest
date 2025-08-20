@@ -1,0 +1,308 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Estadísticas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard">
+
+    <header class="dashboard-header">
+        <h1>Dashboard de Colección</h1>
+        <p>Estadísticas personales y globales en un solo lugar</p>
+    </header>
+
+    <!-- ======= Botón de cambio ======= -->
+    <div class="toggle-stats">
+        <button id="toggleStatsBtn" class="btn-toggle">
+            Ver estadísticas globales
+        </button>
+    </div>
+
+    <!-- ======= Tarjetas principales ======= -->
+    <section class="cards-grid">
+        <div class="card gradient1">
+            <i class="fa-solid fa-compact-disc fa-2x"></i>
+            <h3>Total discos añadidos</h3>
+            <p>{{ total_added }}</p>
+        </div>
+        <div class="card gradient2">
+            <i class="fa-solid fa-heart fa-2x"></i>
+            <h3>Discos en wishlist</h3>
+            <p>{{ total_wished }}</p>
+        </div>
+        <div class="card gradient3">
+            <i class="fa-solid fa-user-check fa-2x"></i>
+            <h3>Usuarios activos</h3>
+            <p>{{ total_users }}</p>
+        </div>
+        <div class="card gradient4">
+            <i class="fa-solid fa-database fa-2x"></i>
+            <h3>Discos en la base</h3>
+            <p>{{ total_records }}</p>
+        </div>
+    </section>
+
+    <!-- ======= Gráficos principales ======= -->
+    <section class="charts-grid">
+        <div class="chart-card">
+            <canvas id="recordsOverTimeChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <canvas id="userGenreChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <canvas id="userArtistsChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <canvas id="userVsGlobalGenreChart"></canvas>
+        </div>
+    </section>
+
+</div>
+
+<style>
+/* ======= Ajustes para gráficos grandes ======= */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.chart-card {
+    background: #1b1b1b;
+    padding: 20px;
+    border-radius: 10px;
+    height: 450px; /* altura fija grande */
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card canvas {
+    flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.toggle-stats {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn-toggle {
+    background-color: #48dbfb;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-toggle:hover {
+    background-color: #1dd1a1;
+}
+</style>
+
+<script>
+    // Asegúrate de que todas las variables estén correctamente pasadas desde Django
+    const globalMonthlyLabels = [{% for label in global_monthly_labels %}"{{ label }}",{% endfor %}];
+    const globalMonthlyValues = [{% for value in global_monthly_values %}{{ value }},{% endfor %}];
+
+    const user_styles_labels = [{% for label in user_styles_labels %}"{{ label }}",{% endfor %}];
+    const user_styles_values = [{% for value in user_styles_values %}{{ value }},{% endfor %}];
+
+    const global_styles_labels = [{% for label in global_styles_labels %}"{{ label }}",{% endfor %}];
+    const global_styles_values = [{% for value in global_styles_values %}{{ value }},{% endfor %}];
+
+    const global_artist_labels = [{% for label in global_artist_labels %}"{{ label }}",{% endfor %}];
+    const global_artist_values = [{% for value in global_artist_values %}{{ value }},{% endfor %}];
+
+    const artist_labels = {{ artist_labels|safe }};
+    const artist_values = {{ artist_values|safe }};
+
+    // Verificar que los datos están siendo pasados correctamente
+    console.log("globalMonthlyLabels: ", globalMonthlyLabels);
+    console.log("globalMonthlyValues: ", globalMonthlyValues);
+    console.log("user_styles_labels: ", user_styles_labels);
+    console.log("user_styles_values: ", user_styles_values);
+
+    // Crear gráfico de discos añadidos por mes/año
+    const ctxMonthly = document.getElementById('recordsOverTimeChart').getContext('2d');
+    const recordsOverTimeChart = new Chart(ctxMonthly, {
+        type: 'line',
+        data: {
+            labels: [{% for label in monthly_labels %}"{{ label }}",{% endfor %}],
+            datasets: [{
+                label: 'Discos añadidos',
+                data: [{% for value in monthly_values %}{{ value }},{% endfor %}],
+                borderColor: '#1dd1a1',
+                backgroundColor: 'rgba(29,209,161,0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tus discos añadidos por mes/año',  // Título por defecto
+                    font: {
+                        size: 18
+                    },
+                    color: '#3498db'  // Color del título (azul brillante)
+                }
+            }
+        }
+    });
+
+    // Crear gráfico de estilos más escuchados
+    const ctxUserGenre = document.getElementById('userGenreChart').getContext('2d');
+    const userGenreChart = new Chart(ctxUserGenre, {
+        type: 'doughnut',
+        data: {
+            labels: user_styles_labels,
+            datasets: [{
+                data: user_styles_values,
+                backgroundColor: ['#ff6b6b','#feca57','#48dbfb','#1dd1a1','#5f27cd']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tus estilos más escuchados',  // Título por defecto
+                    font: {
+                        size: 18
+                    },
+                    color: '#3498db'  // Color del título (azul brillante)
+                }
+            }
+        }
+    });
+
+    // Crear gráfico de artistas más frecuentes
+    const ctxUserArtists = document.getElementById('userArtistsChart').getContext('2d');
+    const userArtistsChart = new Chart(ctxUserArtists, {
+        type: 'bar',
+        data: {
+            labels: artist_labels,
+            datasets: [{
+                label: 'Cantidad de discos',
+                data: artist_values,
+                backgroundColor: '#feca57'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tus artistas más frecuentes',  // Título por defecto
+                    font: {
+                        size: 18
+                    },
+                    color: '#3498db'  // Color del título (azul brillante)
+                }
+            }
+        }
+    });
+
+    // Comparación de estilos con el promedio global
+    const ctxGlobal = document.getElementById('userVsGlobalGenreChart').getContext('2d');
+    const userVsGlobalGenreChart = new Chart(ctxGlobal, {
+        type: 'bar',
+        data: {
+            labels: global_styles_labels,
+            datasets: [{
+                label: 'Tu colección',
+                data: user_styles_values,
+                backgroundColor: '#48dbfb'
+            },{
+                label: 'Global',
+                data: global_styles_values,
+                backgroundColor: '#ff6b6b'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Comparación de estilos con el promedio global',  // Título por defecto
+                    font: {
+                        size: 18
+                    },
+                    color: '#3498db'  // Color del título (azul brillante)
+                }
+            }
+        }
+    });
+
+    // Alternancia entre gráficos personales y globales
+    let showingUser = true;
+
+    document.getElementById('toggleStatsBtn').addEventListener('click', () => {
+        if (showingUser) {
+            // Cambiar a global
+            recordsOverTimeChart.data.labels = globalMonthlyLabels;
+            recordsOverTimeChart.data.datasets[0].data = globalMonthlyValues;
+            userGenreChart.data.labels = global_styles_labels;
+            userGenreChart.data.datasets[0].data = global_styles_values;
+            userArtistsChart.data.labels = global_artist_labels;
+            userArtistsChart.data.datasets[0].data = global_artist_values;
+
+            // Cambiar los títulos de los gráficos para "global"
+            recordsOverTimeChart.options.plugins.title.text = 'Discos añadidos globalmente por mes/año';
+            userGenreChart.options.plugins.title.text = 'Estilos más escuchados globalmente';
+            userArtistsChart.options.plugins.title.text = 'Artistas más frecuentes globalmente';
+
+            // Cambiar el color del título cuando es global
+            recordsOverTimeChart.options.plugins.title.color = '#e74c3c';  // Rojo brillante
+            userGenreChart.options.plugins.title.color = '#e74c3c';  // Rojo brillante
+            userArtistsChart.options.plugins.title.color = '#e74c3c';  // Rojo brillante
+
+            document.getElementById('toggleStatsBtn').innerText = "Ver mis estadísticas";
+            showingUser = false;
+        } else {
+            // Volver a usuario
+            recordsOverTimeChart.data.labels = [{% for label in monthly_labels %}"{{ label }}",{% endfor %}];
+            recordsOverTimeChart.data.datasets[0].data = [{% for value in monthly_values %}{{ value }},{% endfor %}];
+            userGenreChart.data.labels = user_styles_labels;
+            userGenreChart.data.datasets[0].data = user_styles_values;
+            userArtistsChart.data.labels = artist_labels;
+            userArtistsChart.data.datasets[0].data = artist_values;
+
+            // Cambiar los títulos de los gráficos para "usuario"
+            recordsOverTimeChart.options.plugins.title.text = 'Tus discos añadidos por mes/año';
+            userGenreChart.options.plugins.title.text = 'Tus estilos más escuchados';
+            userArtistsChart.options.plugins.title.text = 'Tus artistas más frecuentes';
+
+            // Cambiar el color del título cuando es usuario
+            recordsOverTimeChart.options.plugins.title.color = '#3498db';  // Azul brillante
+            userGenreChart.options.plugins.title.color = '#3498db';  // Azul brillante
+            userArtistsChart.options.plugins.title.color = '#3498db';  // Azul brillante
+
+            document.getElementById('toggleStatsBtn').innerText = "Ver estadísticas globales";
+            showingUser = true;
+        }
+
+        // Actualizar gráficos para reflejar el cambio
+        recordsOverTimeChart.update();
+        userGenreChart.update();
+        userArtistsChart.update();
+    });
+</script>
+
+
+
+{% endblock %}
