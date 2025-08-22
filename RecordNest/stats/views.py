@@ -9,7 +9,6 @@ from users.models import CustomUser as User
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def most_added_records(request):
-    # Contar los discos más añadidos a la colección
     most_added_qs = (
         UserRecord.objects
         .values('title', 'artists', 'cover_image')
@@ -17,7 +16,6 @@ def most_added_records(request):
         .order_by('-total_added')[:10]
     )
 
-    # Transformar a lista de diccionarios para pasar a la plantilla
     most_added = []
     for item in most_added_qs:
         most_added.append({
@@ -35,7 +33,7 @@ def most_added_records(request):
 
 
 def fetch_master_details(master_id, total_wished):
-    d = get_discogs_client()  # cliente de Discogs
+    d = get_discogs_client()
     try:
         master = d.master(master_id)
         master.refresh()
@@ -79,7 +77,6 @@ def most_wished_records(request):
 
     most_wished_data = []
 
-    # Creamos una lista de tuplas (master_id, total_wished) para pasar a la función concurrente
     master_ids = [(item['discogs_master_id'], item['total_wished']) for item in most_wished]
 
     # Usamos ThreadPoolExecutor para hacer las peticiones concurrentemente
@@ -109,7 +106,7 @@ def fetch_record(master_id, total, client):
             'total': total
         }
     except Exception as e:
-        # fallback si falla la petición
+
         return {
             'id': master_id,
             'title': 'Desconocido',
@@ -123,7 +120,6 @@ def top_records(request):
     list_type = request.GET.get('type', 'wished')
 
     if list_type == 'added':
-        # TOP DISCOS MÁS AÑADIDOS (sin Discogs, rápido)
         records = (
             UserRecord.objects
             .values('title', 'artists', 'cover_image')
@@ -133,7 +129,7 @@ def top_records(request):
         title = "Top 10 Discos más añadidos a la colección"
 
     else:
-        # TOP DISCOS MÁS DESEADOS
+
         most_wished = (
             Wishlist.objects
             .values('discogs_master_id')
@@ -144,7 +140,6 @@ def top_records(request):
         d = get_discogs_client()
         records_dict = {}
 
-        # Ejecutamos peticiones a Discogs de manera concurrente
         with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_master = {
                 executor.submit(fetch_record, item['discogs_master_id'], item['total'], d): item
@@ -154,7 +149,6 @@ def top_records(request):
                 record = future.result()
                 records_dict[record['id']] = record
 
-        # Mantener el orden original de most_wished
         records = [
             records_dict[item['discogs_master_id']]
             for item in most_wished
@@ -215,7 +209,7 @@ def statistics(request):
     user_records = UserRecord.objects.filter(user=user)
     style_list = []
     for r in user_records:
-        if r.styles:  # suponiendo que styles es texto con comas
+        if r.styles:
             style_list.extend([g.strip() for g in r.styles.split(',')])
 
     style_counts = Counter(style_list)
@@ -283,7 +277,7 @@ def statistics(request):
     # ------------------------
     artist_list = []
     for r in user_records:
-        if r.artists:  # suponiendo que artists es texto con comas
+        if r.artists:
             artist_list.extend([a.strip() for a in r.artists.split(',')])
 
     artist_counts = Counter(artist_list)
