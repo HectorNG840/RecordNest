@@ -679,6 +679,26 @@ body {
   cursor: pointer;
 }
 
+.wishlist-items {
+    list-style: none;
+    padding: 0;
+}
+
+.wishlist-record {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.wishlist-record img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+
+
 @media (min-width: 1024px) {
   .tag-controls-wrapper {
     flex-direction: row;

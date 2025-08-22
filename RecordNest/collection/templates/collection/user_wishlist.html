@@ -1,0 +1,61 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Mi Wishlist{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/collection.css' %}">
+
+<h2 class="collection-title">Mi Wishlist</h2>
+
+<div class="collection-grid">
+  {% for record in records %}
+    <div class="collection-card">
+      <a href="{% url 'record_detail' %}?release_id={{ record.release_id }}&title={{ record.title }}&artists={{ record.artists }}" class="collection-link">
+          <div class="image-container" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
+          <div class="card-body">
+              <h3 class="card-title">{{ record.title }}</h3>
+              <p><strong>Artista:</strong> {{ record.artists }}</p>
+              <p><strong>Año:</strong> {{ record.year }}</p>
+              <p><strong>Géneros:</strong> {{ record.genres }}</p>
+              <p><strong>Formato:</strong> {{ record.formats }}</p>
+          </div>
+      </a>
+      <div class="card-options">
+        <button class="menu-btn" onclick="toggleMenu(this)">⋮</button>
+        <div class="dropdown-menu">
+          <!-- Asegúrate de usar 'wishlist.id' y no 'record.id' -->
+          <form action="{% url 'remove_from_wishlist' record.wishlist_id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-option-btn dropdown-danger">Eliminar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="no-results">No hay discos en tu wishlist aún.</p>
+  {% endfor %}
+</div>
+
+
+<script>
+function toggleMenu(button) {
+  event.stopPropagation();
+  const menu = button.nextElementSibling;
+
+  // Cerrar otros
+  document.querySelectorAll('.dropdown-menu').forEach(m => {
+    if (m !== menu) m.style.display = 'none';
+  });
+
+  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+  document.querySelectorAll('.dropdown-options').forEach(opt => opt.style.display = 'none');
+});
+
+</script>
+
+{% endblock %}

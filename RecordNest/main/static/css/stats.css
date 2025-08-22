@@ -1,0 +1,226 @@
+/* Contenedor principal de estadísticas */
+.stats-title, .chart-title {
+    text-align: center;
+    color: #aed6b2;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Botones de toggle */
+.list-toggle {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.toggle-btn {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 0.5rem 1rem;
+    background-color: #2a2a2a;
+    color: #aed6b2;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.toggle-btn:hover {
+    background-color: #3a3a3a;
+}
+
+.toggle-btn.active {
+    background-color: #aed6b2;
+    color: #111;
+}
+
+/* Grid unificado */
+.records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 3rem;
+}
+.dashboard-header{
+    background: #1b1b1b;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Tarjeta de disco unificada */
+.record-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    max-width: 180px;       /* límite de ancho */
+    margin: 0 auto;         /* centra dentro de la columna */
+}
+.record-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+}
+
+/* Imagen de la tarjeta */
+.record-card img {
+    width: 100%;
+    max-height: 180px;      /* límite de altura */
+    object-fit: contain;    /* no se corta la imagen */
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background-color: #2a2a2a; /* fondo para discos sin portada */
+}
+
+/* Título y artista */
+.record-card h3 {
+    font-size: 0.9rem;
+    margin: 2px 0;
+    color: #aed6b2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.record-card p {
+    font-size: 0.75rem;
+    margin: 1px 0;
+    color: #ccc;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+
+/* Botón pequeño */
+.cta-button-small {
+    display: inline-block;
+    background-color: #aed6b2;
+    color: #111;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    text-decoration: none;
+    margin-top: 4px;
+    transition: background-color 0.2s;
+}
+
+.cta-button-small:hover {
+    background-color: #88b792;
+}
+
+.main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+.stats-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.8rem;
+    color: #27ae60;
+}
+
+.stats-section {
+    margin-bottom: 60px;
+}
+
+.stats-section h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #82e0aa;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #1b1b1b;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.stat-card h3 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: #fff;
+}
+
+.stat-card p {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #aed6b2;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 30px;
+}
+.chart-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    height: 450px; /* altura fija grande */
+    display: flex;
+    flex-direction: column;
+}
+.chart-card canvas {
+    flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-container {
+    background: #111;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+canvas {
+    max-width: 100%;
+}
+
+.most-records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.record-card {
+    background: #1b1b1b;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.record-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.record-card h4 {
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+.record-card p {
+    font-size: 0.9rem;
+    color: #82e0aa;
+}
+
+

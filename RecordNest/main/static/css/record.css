@@ -308,24 +308,35 @@ body {
   margin: 0;
   padding: 0;
 }
+.button-container {
+    display: flex;
+    gap: 20px; /* Espacio entre los botones */
+    justify-content: flex-start; /* Alineamos los botones a la izquierda */
+    margin-top: 1rem; /* Añadimos algo de margen superior */
+    width: 100%; /* Aseguramos que ocupe todo el ancho disponible */
+}
 
-.collection-btn {
-  background-color: #aed6b2;
-  color: #111;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  margin-top: 1rem;
+.collection-btn,
+.wishlist-btn {
+    background-color: #aed6b2;
+    color: #111;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    flex-grow: 1; /* Hace que ambos botones crezcan y tengan el mismo tamaño */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .collection-btn:hover {
-  background-color: #8bcba0;
-  transform: scale(1.03);
+    background-color: #8bcba0;
+    transform: scale(1.03);
 }
 
 @keyframes spin {
@@ -445,6 +456,44 @@ body {
 .tag-select:focus {
     background-color: #333;
     outline: none;
+}
+
+/* Estilo del botón de añadir a la wishlist */
+.wishlist-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.wishlist-btn i {
+    margin-right: 10px;
+}
+
+.wishlist-btn:hover {
+    background-color: #e60000;
+    transform: scale(1.05);
+}
+
+/* Efecto de enfoque en el botón */
+.wishlist-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.5);
+}
+
+/* Estilo del botón cuando ya está en la wishlist */
+.wishlist-btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 
