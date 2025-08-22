@@ -28,6 +28,19 @@ class UserRecord(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
     tracklist_JSON = models.JSONField(default=list, blank=True)
 
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    discogs_master_id = models.CharField(max_length=255, null=True, blank=True)  # Guardar el master_id o release_id
+    discogs_release_id = models.CharField(max_length=255, null=True, blank=True)  # Si prefieres usar release_id
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "discogs_master_id", "discogs_release_id")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.discogs_master_id or self.discogs_release_id}"
+
 class FavoriteRecord(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="favorite_record")
     record_1 = models.ForeignKey(UserRecord, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')

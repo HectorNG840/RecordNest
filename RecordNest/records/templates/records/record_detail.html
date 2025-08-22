@@ -36,25 +36,53 @@
 
     </div>
 
-    <form action="{% url 'add_to_collection' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="title" value="{{ record.title }}">
-        <input type="hidden" name="artists" value="{{ record.artists }}">
-        <input type="hidden" name="year" value="{{ record.year }}">
-        <input type="hidden" name="cover_image" value="{{ record.images.0|default:'' }}">
-        <input type="hidden" name="released" value="{{ record.released }}">
-        <input type="hidden" name="notes" value="{{ record.notes }}">
-        <input type="hidden" name="barcode" value="{{ record.barcode }}">
-        <input type="hidden" name="tags" value="{{ record.tags }}">
-        <input type="hidden" name="genres" value="{{ record.genres }}">
-        <input type="hidden" name="styles" value="{{ record.styles }}">
-        <input type="hidden" name="labels" value="{{ record.labels }}">
-        <input type="hidden" name="formats" value="{{ record.formats }}">
-        {{ record.tracklist|json_script:"tracklist-data" }}
-        <input type="hidden" name="tracklist_json" id="tracklist-json-input">
+    <div class="button-container">
+        <form action="{% url 'add_to_collection' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="title" value="{{ record.title }}">
+            <input type="hidden" name="artists" value="{{ record.artists }}">
+            <input type="hidden" name="year" value="{{ record.year }}">
+            <input type="hidden" name="cover_image" value="{{ record.images.0|default:'' }}">
+            <input type="hidden" name="released" value="{{ record.released }}">
+            <input type="hidden" name="notes" value="{{ record.notes }}">
+            <input type="hidden" name="barcode" value="{{ record.barcode }}">
+            <input type="hidden" name="tags" value="{{ record.tags }}">
+            <input type="hidden" name="genres" value="{{ record.genres }}">
+            <input type="hidden" name="styles" value="{{ record.styles }}">
+            <input type="hidden" name="labels" value="{{ record.labels }}">
+            <input type="hidden" name="formats" value="{{ record.formats }}">
+            {{ record.tracklist|json_script:"tracklist-data" }}
+            <input type="hidden" name="tracklist_json" id="tracklist-json-input">
 
-        <button type="submit" class="collection-btn">➕ Añadir a mi colección</button>
-    </form>
+            <button type="submit" class="collection-btn">➕ Añadir a mi colección</button>
+        </form>
+
+        {% if is_in_wishlist %}
+            <button class="wishlist-btn" disabled>
+                <i class="fas fa-heart"></i> Ya está en tu wishlist
+            </button>
+        {% else %}
+            {% if record.master_id %}
+                <form action="{% url 'add_to_wishlist' record.master_id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="wishlist-btn">
+                        <i class="fas fa-heart"></i> Añadir a la wishlist
+                    </button>
+                </form>
+            {% elif record.release_id %}
+                <form action="{% url 'add_to_wishlist' record.release_id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="wishlist-btn">
+                        <i class="fas fa-heart"></i> Añadir a la wishlist
+                    </button>
+                </form>
+            {% else %}
+                <p>Este disco no tiene un identificador disponible para añadir a la wishlist.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+
 
     <h3>Tracklist</h3>
     <div class="spotify-tracklist">

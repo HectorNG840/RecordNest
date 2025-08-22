@@ -1,0 +1,77 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/stats.css' %}">
+
+<div class="main-content">
+    <h1 class="stats-title">{{ title }}</h1>
+
+    <!-- Botones para cambiar de lista -->
+    <div class="list-toggle">
+        <a href="?type=wished" class="toggle-btn {% if list_type == 'wished' %}active{% endif %}">Más deseados</a>
+        <a href="?type=added" class="toggle-btn {% if list_type == 'added' %}active{% endif %}">Más añadidos</a>
+    </div>
+
+    <!-- Grid de discos MÁS DESEADOS -->
+    <div class="records-grid">
+        {% for record in records %}
+        <div class="record-card">
+            <img src="{{ record.cover_image|default:'/static/images/placeholder-image.png' }}" alt="{{ record.title }}">
+            <h3>{{ record.title }}</h3>
+            <p><strong>Artista:</strong> {{ record.artists }}</p>
+            <p><strong>Total:</strong> {{ record.total }}</p>
+            {% if list_type == 'added' %}
+            <a href="{% url 'record_detail' %}?master_id={{ record.id }}" class="cta-button-small">Ver detalle</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <!-- Gráfico -->
+    <h2 class="chart-title">Visualización de popularidad</h2>
+    <canvas id="recordsChart" width="600" height="400"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('recordsChart').getContext('2d');
+const recordsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for record in records %}"{{ record.title|escapejs }}",{% endfor %}],
+        datasets: [{
+            label: 'Cantidad',
+            data: [{% for record in records %}{{ record.total }},{% endfor %}],
+            backgroundColor: 'rgba(174, 214, 178, 0.8)',
+            borderColor: 'rgba(174, 214, 178, 1)',
+            borderWidth: 1,
+            borderRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#252321',
+                titleColor: '#aed6b2',
+                bodyColor: '#fff'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#fff' },
+                grid: { color: '#333' }
+            },
+            x: {
+                ticks: { color: '#fff' },
+                grid: { color: '#333' }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

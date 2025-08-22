@@ -1,9 +1,9 @@
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .forms import RecordListForm
-from .models import UserRecord, Track, Tag, RecordList
+from .models import UserRecord, Track, Tag, RecordList, Wishlist
 import json
 import requests
 from django.http import JsonResponse
@@ -11,6 +11,18 @@ import base64
 from django.core.files.base import ContentFile
 import uuid
 from django.core.exceptions import PermissionDenied
+import discogs_client
+from django.conf import settings
+from discogs_client.exceptions import HTTPError
+
+def get_discogs_client():
+    return discogs_client.Client(
+        'RecordNest/1.0',
+        consumer_key=settings.DISCOGS_CONSUMER_KEY,
+        consumer_secret=settings.DISCOGS_CONSUMER_SECRET,
+        token=settings.DISCOGS_OAUTH_TOKEN,
+        secret=settings.DISCOGS_OAUTH_SECRET
+    )
 
 @login_required
 def add_to_collection(request):
@@ -273,5 +285,167 @@ def fetch_preview_url(request, track_id):
             return JsonResponse({'preview': data.get("preview")})
         except Exception:
             return JsonResponse({'preview': None}, status=500)
+        
+
+
+@login_required
+def add_to_wishlist(request, discogs_id):
+    try:
+        d = get_discogs_client()
+
+        print(f"Intentando añadir a wishlist con el ID: {discogs_id}")
+
+
+        expected_title = request.GET.get('title', '').strip()
+
+
+        try:
+            print(f"Intentando obtener el disco {discogs_id} como release_id")
+            release = d.release(discogs_id)  
+            print(f"Disco {discogs_id} es un release.")
+
+            if release.title.strip().lower() == expected_title.lower():
+                print(f"El título coincide con el disco esperado: {expected_title}")
+
+                if hasattr(release, 'master_id') and release.master_id:
+                    print(f"Este release tiene un master_id: {release.master_id}")
+
+                    Wishlist.objects.create(user=request.user, discogs_master_id=release.master_id)
+                    return redirect('user_wishlist')
+                else:
+                    print(f"Este release con ID {discogs_id} no tiene master_id.")
+
+                    Wishlist.objects.create(user=request.user, discogs_release_id=discogs_id)
+                    return redirect('user_wishlist')
+            else:
+                print(f"El título del release no coincide con el título esperado: {expected_title} != {release.title.strip()}")
+                print(f"Intentando con el master_id para el disco {discogs_id}")
+                
+
+                try:
+                    master = d.master(discogs_id)
+                    print(f"Disco {discogs_id} es un master. Guardando en master_id.")
+                    Wishlist.objects.create(user=request.user, discogs_master_id=discogs_id)
+                    return redirect('user_wishlist')
+                except HTTPError as e2:
+
+                    if e2.status_code == 404:
+                        print(f"Disco {discogs_id} no existe ni como master ni como release.")
+                        return HttpResponse(f"El disco con ID {discogs_id} no se encuentra.")
+                    else:
+                        raise 
+
+        except HTTPError as e:
+
+            if e.status_code == 404:
+                print(f"Disco {discogs_id} no es un release_id, intentando como master_id.")
+                try:
+                    master = d.master(discogs_id)
+                    print(f"Disco {discogs_id} es un master. Guardando en master_id.")
+                    Wishlist.objects.create(user=request.user, discogs_master_id=discogs_id)
+                    return redirect('user_wishlist')
+                except HTTPError as e2:
+
+                    if e2.status_code == 404:
+                        print(f"Disco {discogs_id} no existe ni como master ni como release.")
+                        return HttpResponse(f"El disco con ID {discogs_id} no se encuentra.")
+                    else:
+                        raise
+            else:
+                raise
+
+    except Exception as e:
+
+        print(f"Error al añadir a wishlist: {e}")
+        return HttpResponse(f"Error al añadir a wishlist: {e}")
+
+
+
+# Eliminar de wishlist
+@login_required
+def remove_from_wishlist(request, wishlist_id):
+    # Verificar que el usuario está autenticado
+    if not request.user.is_authenticated:
+        return redirect('login')  # Redirigir a login si el usuario no está autenticado
+
+    # Recuperar el objeto de la wishlist usando el ID
+    wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
+    
+
+    wishlist_item.delete()
+
+    return redirect('user_wishlist')
+
+
+
+@login_required
+def user_wishlist(request):
+
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+
+
+    records = []
+
+    for item in wishlist_items:
+        try:
+            if item.discogs_master_id:
+                print(f"Recuperando disco con master_id: {item.discogs_master_id}")
+                d = get_discogs_client()
+                master = d.master(item.discogs_master_id)
+                release = master.main_release
+                release.refresh()
+
+                cover_image = release.images[0]['uri'] if release.images else '/static/images/placeholder-image.png'
+
+                record = {
+                    'title': release.title if release.title else "Sin título",
+                    'artists': ', '.join(artist.name for artist in release.artists) if release.artists else "Desconocido",
+                    'year': release.year if release.year else "Desconocido",
+                    'genres': ', '.join(release.genres) if release.genres else "Desconocidos",
+                    'formats': ', '.join(fmt['name'] for fmt in release.formats) if release.formats else "Desconocido",
+                    'cover_image': cover_image,
+                    'master_id': item.discogs_master_id,
+                    'wishlist_id': item.id  
+                }
+                records.append(record)
+
+            elif item.discogs_release_id:
+                print(f"Recuperando disco con release_id: {item.discogs_release_id}")
+                d = get_discogs_client()
+                release = d.release(item.discogs_release_id)
+                release.refresh()
+
+                cover_image = release.images[0]['uri'] if release.images else '/static/images/placeholder-image.png'
+
+                record = {
+                    'title': release.title if release.title else "Sin título",
+                    'artists': ', '.join(artist.name for artist in release.artists) if release.artists else "Desconocido",
+                    'year': release.year if release.year else "Desconocido",
+                    'genres': ', '.join(release.genres) if release.genres else "Desconocidos",
+                    'formats': ', '.join(fmt['name'] for fmt in release.formats) if release.formats else "Desconocido",
+                    'cover_image': cover_image,
+                    'release_id': item.discogs_release_id,
+                    'wishlist_id': item.id 
+                }
+                records.append(record)
+
+        except Exception as e:
+            print(f"Error al obtener datos de Discogs para ID {item.discogs_master_id or item.discogs_release_id}: {e}")
+            continue
+
+    return render(request, 'collection/user_wishlist.html', {'records': records})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

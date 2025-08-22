@@ -20,6 +20,9 @@ path('lists/<int:list_id>/edit/', views.edit_list, name='edit_list'),
 path('lists/<int:list_id>/', views.list_detail, name='list_detail'),
 path('lists/<int:list_id>/remove/<int:record_id>/', views.remove_record_from_list, name='remove_record_from_list'),
 path("ajax/preview/<int:track_id>/", views.fetch_preview_url, name="fetch_preview_url"),
+path('add_to_wishlist/<str:discogs_id>/', views.add_to_wishlist, name='add_to_wishlist'),
+path('remove_from_wishlist/<int:wishlist_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+path('wishlist/', views.user_wishlist, name='user_wishlist'),
 
 
 
