@@ -28,7 +28,15 @@
         <a href="{% url 'my_lists'  %}">Listas</a>
         <a href="{% url 'user_wishlist' %}">Wishlist</a>
         <a href="{% url 'user_search' %}">Explorar usuarios</a>
-        <a href="{% url 'about' %}">Sobre nosotros</a>
+
+        <div class="dropdown">
+          <button class="dropbtn">Estadísticas</button>
+          <div class="dropdown-content">
+            <a href="{% url 'statistics' %}">Generales</a>
+            <a href="{% url 'top_records' %}">Top Discos</a>
+          </div>
+        </div>
+        
       </nav>
 
       <!-- Right-side: Search + User -->
@@ -105,14 +113,18 @@
         <div class="footer-column">
           <h3>Contacto</h3>
           <p><i class="fas fa-map-marker-alt"></i> Sevilla, España</p>
+          <p><a href="{% url 'about' %}"><i class="fas fa-users"></i> Sobre nosotros</a></p>
           <p><a href="mailto:recordnest.app@gmail.com"><i class="fas fa-envelope"></i> recordnest.app@gmail.com</a></p>
-          <p><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></p>
-          <p><a href="#"><i class="fas fa-file-alt"></i> Términos y condiciones</a></p>
+          <p><a href="{% url 'faq' %}"><i class="fas fa-question-circle"></i> FAQ</a></p>
+          <p><a href="{% url 'terms' %}"><i class="fas fa-file-alt"></i> Términos y condiciones</a></p>
         </div>
       </div>
 
       <div class="footer-bottom">
         © 2025 RecordNest. Todos los derechos reservados.
+        <span class="third-party-note">
+          Datos de discos proporcionados por <a href="https://www.discogs.com/" target="_blank">Discogs</a> y previews de <a href="https://www.deezer.com/" target="_blank">Deezer</a>. Todos los derechos reservados.
+        </span>
       </div>
     </footer>
   {% block scripts %}
