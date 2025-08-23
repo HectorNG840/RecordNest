@@ -16,6 +16,7 @@ from requests_oauthlib import OAuth1Session
 from django.conf import settings
 from math import ceil
 from collection.models import Wishlist
+from collection.models import UserRecord
 import time
 import requests
 from discogs_client.exceptions import HTTPError
@@ -294,7 +295,17 @@ def record_detail(request):
             'record_id': release_id or release.get("id")
         }
 
-        # Verificar si el disco está en la wishlist
+        is_in_collection = False
+        if request.user.is_authenticated:
+            is_in_collection = UserRecord.objects.filter(
+                user=request.user,
+                title=title,
+                artists=clean_artist,
+                year=release.get("year", "")
+            ).exists()
+
+            print(f"¿Está en la colección? {is_in_collection}")
+            
         is_in_wishlist = False
         if request.user.is_authenticated:
             print(f"Verificando si el disco con master_id: {master_id} o release_id: {release_id} está en la wishlist.")
@@ -303,7 +314,7 @@ def record_detail(request):
 
             print(f"¿Está en la wishlist? {is_in_wishlist}")
 
-        return render(request, 'records/record_detail.html', {'record': record, 'is_in_wishlist': is_in_wishlist,})
+        return render(request, 'records/record_detail.html', {'record': record, 'is_in_wishlist': is_in_wishlist, 'is_in_collection': is_in_collection})
 
     except Exception as e:
         print(f"❌ Error en record_detail: {e}")

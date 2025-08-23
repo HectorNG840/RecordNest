@@ -7,6 +7,7 @@ from records.views import get_discogs_client
 from collections import Counter
 from users.models import CustomUser as User
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.contrib.auth.decorators import login_required
 
 def most_added_records(request):
     most_added_qs = (
@@ -126,7 +127,7 @@ def top_records(request):
             .annotate(total=Count('id'))
             .order_by('-total')[:10]
         )
-        title = "Top 10 Discos más añadidos a la colección"
+        title = "Top 10 Discos más añadidos a las colecciones"
 
     else:
 
@@ -165,7 +166,7 @@ def top_records(request):
     return render(request, 'stats/top_records.html', context)
 
 
-
+@login_required
 def statistics(request):
     user = request.user
     now = datetime.now()
@@ -271,7 +272,6 @@ def statistics(request):
         .annotate(total=Count('id'))
         .order_by('-total')[:10]
     )
-
     # ------------------------
     # Artistas más frecuentes del usuario
     # ------------------------

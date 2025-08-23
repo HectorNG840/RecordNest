@@ -3,7 +3,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
@@ -118,6 +118,18 @@ def edit_profile(request):
         form = ProfileUpdateForm(instance=user)
 
     return render(request, "users/edit_profile.html", {"form": form})
+
+@login_required
+def delete_profile(request):
+    user = request.user
+    if request.method == "POST":
+        # Cerrar sesión antes de borrar la cuenta
+        logout(request)
+        user.delete()
+        messages.success(request, "✅ Tu cuenta ha sido eliminada correctamente.")
+        return redirect('index')
+
+    return render(request, "users/delete_profile_confirm.html")
 
 @login_required
 def select_favorite_record(request, slot):

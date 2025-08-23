@@ -53,10 +53,21 @@
             <input type="hidden" name="formats" value="{{ record.formats }}">
             {{ record.tracklist|json_script:"tracklist-data" }}
             <input type="hidden" name="tracklist_json" id="tracklist-json-input">
-
-            <button type="submit" class="collection-btn">➕ Añadir a mi colección</button>
+            {% if is_in_collection %}
+                <button type="submit" class="collection-btn" disabled>
+                    <i class="fa-slab-press fa-regular fa-plus"></i> Ya está en tu colección
+                </button>
+            {% else %}
+                <button type="submit" class="collection-btn" {% if is_in_collection %}disabled{% endif %}>
+                    <i class="fa-slab-press fa-regular fa-plus"></i> Añadir a mi colección
+                </button>
+            {% endif %}
         </form>
 
+        <!-- Verificación para asegurarse de que 'is_in_collection' esté pasando correctamente -->
+        <script>
+            console.log("Está en la colección:", "{{ is_in_collection }}");
+        </script>
         {% if is_in_wishlist %}
             <button class="wishlist-btn" disabled>
                 <i class="fas fa-heart"></i> Ya está en tu wishlist

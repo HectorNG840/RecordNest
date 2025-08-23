@@ -6,13 +6,11 @@ body {
   padding: 0;
 }
 
-
 .record-container {
   padding: 2rem;
   max-width: 1200px;
   margin: auto;
 }
-
 
 .record-container h1, .record-container h3 {
   color: #aed6b2;
@@ -22,14 +20,12 @@ body {
   display: inline-block;
 }
 
-
 .record-header {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
   margin-bottom: 2rem;
 }
-
 
 .image-carousel {
   position: relative;
@@ -47,7 +43,6 @@ body {
   object-fit: cover;
   border-radius: 12px;
 }
-
 
 .carousel-btn {
   position: absolute;
@@ -71,8 +66,6 @@ body {
 .prev-btn { left: 10px; }
 .next-btn { right: 10px; }
 
-
-
 .record-info {
   flex: 1;
   min-width: 280px;
@@ -82,13 +75,11 @@ body {
   margin: 0.4rem 0;
   color: #ccc;
   font-size: 0.95rem;
-  
 }
 
 .record-info p strong {
   color: #fff;
 }
-
 
 .spotify-tracklist {
   display: flex;
@@ -107,7 +98,6 @@ body {
   box-shadow: 0 2px 4px #000;
   flex-wrap: wrap;
 }
-
 
 .track-left {
   display: flex;
@@ -132,7 +122,6 @@ body {
   color: #bbb;
 }
 
-
 .track-right {
   display: flex;
   align-items: center;
@@ -144,7 +133,6 @@ body {
 .track-duration {
   color: #999;
 }
-
 
 .custom-player {
   display: flex;
@@ -190,7 +178,6 @@ body {
   transition: width 0.2s;
 }
 
-
 .deezer-btn {
   background-color: #aed6b2;
   color: #111;
@@ -209,7 +196,6 @@ body {
   color: #777;
   font-size: 1.2rem;
 }
-
 
 .versions-grid {
   display: grid;
@@ -246,7 +232,6 @@ body {
   line-height: 1.3;
 }
 
-
 .version-card-content p {
   margin: 0.2rem 0;
   line-height: 1.3;
@@ -262,7 +247,6 @@ body {
   color: #fff;
 }
 
-
 .version-card-content p:first-child {
   margin-top: 0;
 }
@@ -270,8 +254,6 @@ body {
 .version-card-content p:last-child {
   margin-bottom: 0;
 }
-
-
 
 #load-more {
   margin: 2rem auto 1rem auto;
@@ -290,7 +272,6 @@ body {
   background: #8bcba0;
 }
 
-
 .spinner {
   width: 40px;
   height: 40px;
@@ -308,35 +289,65 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Contenedor de los botones */
 .button-container {
     display: flex;
     gap: 20px; /* Espacio entre los botones */
     justify-content: flex-start; /* Alineamos los botones a la izquierda */
     margin-top: 1rem; /* Añadimos algo de margen superior */
     width: 100%; /* Aseguramos que ocupe todo el ancho disponible */
+    align-items: center; /* Alineamos los botones verticalmente */
 }
 
+/* Botón para añadir a la colección */
 .collection-btn,
 .wishlist-btn {
-    background-color: #aed6b2;
-    color: #111;
-    border: none;
+    background-color: transparent;
+    color: #aed6b2;
+    border: 2px solid #aed6b2;
     padding: 12px 20px;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    flex-grow: 1; /* Hace que ambos botones crezcan y tengan el mismo tamaño */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    max-width: 240px; /* Ajuste del tamaño para los botones */
+    height: 48px; /* Altura fija para los botones */
+    text-align: center;
 }
 
-.collection-btn:hover {
-    background-color: #8bcba0;
-    transform: scale(1.03);
+
+.collection-btn:hover,
+.wishlist-btn:hover {
+    background-color: #aed6b2;
+    color: #111;
+    transform: scale(1.03); /* Pequeña animación */
+}
+
+/* Botón de añadir a wishlist */
+
+
+.wishlist-btn i {
+  margin-right: 10px;
+}
+
+
+.wishlist-btn:disabled,
+.collection-btn:disabled {
+    background-color: #2a2a2a;
+    color: #777;
+    border: 2px solid #444;
+    cursor: not-allowed;
+    /* Aseguramos que los botones deshabilitados tengan el mismo tamaño */
+    width: 100%;
+    max-width: 243px;
+    height: 48px;
 }
 
 @keyframes spin {
@@ -368,132 +379,94 @@ body {
   margin-left: 6px;
   cursor: pointer;
 }
+
 .tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
 }
 
 .tag-chip {
-    background-color: #444;
-    color: white;
-    border-radius: 20px;
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
+  background-color: #444;
+  color: white;
+  border-radius: 20px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
 }
 
 .tag-remove-btn {
-    background: none;
-    border: none;
-    color: #ff7676;
-    margin-left: 6px;
-    font-weight: bold;
-    cursor: pointer;
+  background: none;
+  border: none;
+  color: #ff7676;
+  margin-left: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .tag-add-form .tag-input {
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    background: #fff;
-    color: #333;
-    width: 200px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #333;
+  width: 200px;
 }
 
 .tag-input {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    width: 250px;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  width: 250px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .tag-input:focus {
-    border-color: #88cc88;
-    outline: none;
-    background-color: #fff;
+  border-color: #88cc88;
+  outline: none;
+  background-color: #fff;
 }
 
 .tag-add-btn {
-    background-color: #aed6b2;
-    border: none;
-    color: #fff;
-    font-size: 18px;
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
+  background-color: #aed6b2;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
 }
 
 .tag-add-btn:hover {
-    background-color: #8bcba0;
+  background-color: #8bcba0;
 }
+
 .tag-select {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 18px;
-    background-color: #222;
-    color: #fff;
-    font-size: 14px;
-    appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    padding-right: 36px;
-    transition: background-color 0.3s;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 18px;
+  background-color: #222;
+  color: #fff;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+  transition: background-color 0.3s;
 }
 
 .tag-select:hover,
 .tag-select:focus {
-    background-color: #333;
-    outline: none;
+  background-color: #333;
+  outline: none;
 }
-
-/* Estilo del botón de añadir a la wishlist */
-.wishlist-btn {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    transition: background-color 0.3s, transform 0.2s ease;
-}
-
-.wishlist-btn i {
-    margin-right: 10px;
-}
-
-.wishlist-btn:hover {
-    background-color: #e60000;
-    transform: scale(1.05);
-}
-
-/* Efecto de enfoque en el botón */
-.wishlist-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.5);
-}
-
-/* Estilo del botón cuando ya está en la wishlist */
-.wishlist-btn:disabled {
-    background-color: #999;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-
