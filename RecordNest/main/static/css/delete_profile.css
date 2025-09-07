@@ -5,20 +5,18 @@ html,body {
   padding: 0;
   color: #fff;
 }
-/* Contenedor general centrado */
-/* Contenedor centrado y fondo de la app */
+
 .delete-profile-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 70vh;
   padding: 2rem;
-  background-color: #1b1b1b; /* mismo fondo que body */
+  background-color: #1b1b1b;
 }
 
-/* Tarjeta de eliminación */
 .delete-profile-card {
-  background-color: #2a2a2a; /* mismo color que tus cards */
+  background-color: #2a2a2a;
   padding: 2.5rem 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
@@ -27,15 +25,13 @@ html,body {
   text-align: center;
 }
 
-/* Título */
 .delete-title {
   font-size: 2rem;
-  color: #aed6b2; /* color de títulos de tus collections */
+  color: #aed6b2;
   font-weight: bold;
   margin-bottom: 1rem;
 }
 
-/* Advertencia */
 .delete-warning {
   font-size: 1rem;
   color: #ccc;
@@ -43,16 +39,14 @@ html,body {
   margin-bottom: 2rem;
 }
 
-/* Formulario */
 .delete-profile-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Botón eliminar */
 .delete-btn {
-  background-color: #e74c3c; /* rojo de peligro */
+  background-color: #e74c3c;
   color: #fff;
   font-weight: bold;
   padding: 0.75rem 0;
@@ -67,11 +61,10 @@ html,body {
   background-color: #c0392b;
 }
 
-/* Botón cancelar */
 .cancel-btn {
   text-decoration: none;
   text-align: center;
-  color: #aed6b2; /* mismo verde que tus títulos */
+  color: #aed6b2;
   border: 2px solid #aed6b2;
   padding: 0.6rem 0;
   border-radius: 8px;
@@ -81,7 +74,7 @@ html,body {
 
 .cancel-btn:hover {
   background-color: #aed6b2;
-  color: #1b1b1b; /* fondo del body */
+  color: #1b1b1b;
 }
 
 

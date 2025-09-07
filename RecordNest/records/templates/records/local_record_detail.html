@@ -17,7 +17,18 @@
         {% endif %}
 
         <div class="record-info">
-            <p><strong>Artistas:</strong> {{ record.artists }}</p>
+            <p><strong>Artista:</strong>
+            {% for artist in record.artists.all %}
+                {% if artist.discogs_id %}
+                    <a href="{% url 'artists:artist_detail' %}?id={{ artist.discogs_id }}" class="artist-link">{{ artist.name }}</a>
+                {% else %}
+                    {{ artist.name }}
+                {% endif %}
+                {% if not forloop.last %}, {% endif %}
+            {% empty %}
+                Sin artista
+            {% endfor %}
+            </p>
             <p><strong>Año:</strong> {{ record.year }}</p>
             <p><strong>Lanzado:</strong> {{ record.released }}</p>
             <p><strong>Notas:</strong> {{ record.notes }}</p>

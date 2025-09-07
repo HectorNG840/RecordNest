@@ -54,7 +54,7 @@ header {
   background: none;
   border: none;
   cursor: pointer;
-  font-family: inherit;  /* muy importante para que herede la fuente */
+  font-family: inherit;
 }
 .nav-links a:hover,
 .dropbtn:hover {

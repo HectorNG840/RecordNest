@@ -5,7 +5,6 @@ body {
   padding: 0;
   color: #fff;
 }
-/* Contenedor principal de estadísticas */
 .stats-title {
   font-size: 2.2rem;
   color: #aed6b2;
@@ -20,7 +19,6 @@ body {
     font-weight: 600;
 }
 
-/* Botones de toggle */
 .list-toggle {
     text-align: center;
     margin-bottom: 2rem;
@@ -46,10 +44,9 @@ body {
     color: #111;
 }
 
-/* Grid unificado */
 .records-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Esto hace que los discos se adapten al tamaño de la pantalla */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 2rem;
   padding: 2rem;
   max-width: 1400px;
@@ -61,34 +58,31 @@ body {
     border-radius: 10px;
 }
 
-/* Tarjeta de disco unificada */
 .record-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #2a2a2a; /* Fondo oscuro */
+  background-color: #2a2a2a;
   border-radius: 12px;
-  padding: 16px; /* Añadimos más espacio dentro de la tarjeta */
+  padding: 16px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra de la tarjeta */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin: 10px; /* Añadimos margen entre las tarjetas */
+  margin: 10px;
 }
 
 .record-card:hover {
-  transform: scale(1.03); /* Efecto de zoom */
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5); /* Aumentamos la sombra al hacer hover */
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
 
-/* Imagen de la tarjeta */
 .record-card img {
-    width: 100%;          /* Asegura que la imagen ocupe todo el ancho disponible */
+    width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* Información del disco */
 .record-card h3 {
   font-size: 1rem;
   margin: 0.5rem 0;
@@ -102,7 +96,6 @@ body {
 }
 
 
-/* Botón pequeño */
 .cta-button-small {
   background-color: #aed6b2;
   color: #111;
@@ -173,7 +166,7 @@ body {
     background: #fff;
     padding: 20px;
     border-radius: 10px;
-    height: 450px; /* altura fija grande */
+    height: 450px;
     display: flex;
     flex-direction: column;
 }

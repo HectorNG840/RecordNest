@@ -8,6 +8,10 @@
 
 <h2 class="collection-title">Mi Colección</h2>
 
+<div class="recs-btn-container">
+  <a href="{% url 'recommendations_page' %}" class="recs-btn">Ver recomendaciones</a>
+</div>
+
 
 <div class="tag-controls-wrapper">
   <div class="filter-wrapper">
@@ -78,7 +82,7 @@
         <div class="image-container" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
         <div class="card-body">
           <h3 class="card-title">{{ record.title }}</h3>
-          <p><strong>Artista:</strong> {{ record.artists }}</p>
+          <p><strong>Artista:</strong> {{ record.artists.all|join:", " }}</p>
           <p><strong>Año:</strong> {{ record.year|default:"Desconocido" }}</p>
           <p><strong>Géneros:</strong> {{ record.genres|default:"Desconocidos" }}</p>
           <p><strong>Formato:</strong> {{ record.formats|default:"Desconocido" }}</p>

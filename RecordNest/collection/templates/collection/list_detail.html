@@ -27,7 +27,7 @@
           <div class="record-cover" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
           <div class="record-meta">
             <h3 class="record-title">{{ record.title }}</h3>
-            <p><strong>Artista:</strong> {{ record.artists }}</p>
+            <p><strong>Artista:</strong> {{ record.artists.all|join:", " }}</p>
             <p><strong>Año:</strong> {{ record.year }}</p>
             <p><strong>Géneros:</strong> {{ record.genres }}</p>
             <p><strong>Formato:</strong> {{ record.formats }}</p>

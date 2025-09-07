@@ -290,17 +290,16 @@ body {
   padding: 0;
 }
 
-/* Contenedor de los botones */
+
 .button-container {
     display: flex;
-    gap: 20px; /* Espacio entre los botones */
-    justify-content: flex-start; /* Alineamos los botones a la izquierda */
-    margin-top: 1rem; /* Añadimos algo de margen superior */
-    width: 100%; /* Aseguramos que ocupe todo el ancho disponible */
-    align-items: center; /* Alineamos los botones verticalmente */
+    gap: 20px;
+    justify-content: flex-start;
+    margin-top: 1rem;
+    width: 100%;
+    align-items: center;
 }
 
-/* Botón para añadir a la colección */
 .collection-btn,
 .wishlist-btn {
     background-color: transparent;
@@ -317,8 +316,8 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: 240px; /* Ajuste del tamaño para los botones */
-    height: 48px; /* Altura fija para los botones */
+    max-width: 240px;
+    height: 48px;
     text-align: center;
 }
 
@@ -327,11 +326,8 @@ body {
 .wishlist-btn:hover {
     background-color: #aed6b2;
     color: #111;
-    transform: scale(1.03); /* Pequeña animación */
+    transform: scale(1.03);
 }
-
-/* Botón de añadir a wishlist */
-
 
 .wishlist-btn i {
   margin-right: 10px;
@@ -344,7 +340,6 @@ body {
     color: #777;
     border: 2px solid #444;
     cursor: not-allowed;
-    /* Aseguramos que los botones deshabilitados tengan el mismo tamaño */
     width: 100%;
     max-width: 243px;
     height: 48px;
@@ -469,4 +464,50 @@ body {
 .tag-select:focus {
   background-color: #333;
   outline: none;
+}
+
+.recommend-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #ff9800;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.image-container-recommender {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+.artist-link {
+  color: #aed6b2;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.artist-link:hover {
+  color: #7fa282;
+  border-bottom-color: #7fa282;
+}
+
+.artist-link:active {
+  color: #ffffff;
 }

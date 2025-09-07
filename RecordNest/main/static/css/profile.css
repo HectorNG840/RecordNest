@@ -280,10 +280,11 @@ body {
 .delete-btn {
     display: inline-block;
     margin-top: 10px;
-    padding: 8px 15px;
+    padding: 0.5rem 1rem;
+    height: 90%;
     background-color: #e74c3c;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
     text-decoration: none;
     font-weight: bold;
 }

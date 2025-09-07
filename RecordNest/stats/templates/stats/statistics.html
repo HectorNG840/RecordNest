@@ -66,7 +66,6 @@
 </div>
 
 <style>
-/* ======= Ajustes para gráficos grandes ======= */
 .charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -78,7 +77,7 @@
     background: #1b1b1b;
     padding: 20px;
     border-radius: 10px;
-    height: 450px; /* altura fija grande */
+    height: 450px;
     display: flex;
     flex-direction: column;
 }
@@ -109,7 +108,6 @@
 </style>
 
 <script>
-    // Asegúrate de que todas las variables estén correctamente pasadas desde Django
     const globalMonthlyLabels = [{% for label in global_monthly_labels %}"{{ label }}",{% endfor %}];
     const globalMonthlyValues = [{% for value in global_monthly_values %}{{ value }},{% endfor %}];
 
@@ -125,7 +123,7 @@
     const artist_labels = {{ artist_labels|safe }};
     const artist_values = {{ artist_values|safe }};
 
-    // Verificar que los datos están siendo pasados correctamente
+
     console.log("globalMonthlyLabels: ", globalMonthlyLabels);
     console.log("globalMonthlyValues: ", globalMonthlyValues);
     console.log("user_styles_labels: ", user_styles_labels);

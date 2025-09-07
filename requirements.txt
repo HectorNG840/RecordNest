@@ -5,3 +5,4 @@ discog-client
 python-decouple
 bbcode
 scikit-learn
+sentence-transformers

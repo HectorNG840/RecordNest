@@ -1,4 +1,5 @@
 {% extends 'main/base.html' %}
+{% load custom_filters %}
 
 {% block title %}{{ record.title }} | RecordNest{% endblock %}
 
@@ -23,7 +24,15 @@
         
 
         <div class="record-info">
-            <p><strong>Artistas:</strong> {{ record.artists }}</p>
+            <p><strong>Artistas:</strong>
+                {% for artist in record.artists %}
+                    <a href="{% url 'artists:artist_detail' %}?id={{ artist.id }}" class="artist-link">
+                        {{ artist.name }}
+                    </a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    Sin artista
+                {% endfor %}
+            </p>
             <p><strong>Año:</strong> {{ record.year }}</p>
             <p><strong>Lanzado:</strong> {{ record.released }}</p>
             <p><strong>Notas:</strong> {{ record.notes }}</p>
@@ -40,7 +49,10 @@
         <form action="{% url 'add_to_collection' %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="title" value="{{ record.title }}">
-            <input type="hidden" name="artists" value="{{ record.artists }}">
+            
+            {{ record.artists|json_script:"artists-data" }}
+            <input type="hidden" name="artists" id="artists-json-input">
+
             <input type="hidden" name="year" value="{{ record.year }}">
             <input type="hidden" name="cover_image" value="{{ record.images.0|default:'' }}">
             <input type="hidden" name="released" value="{{ record.released }}">
@@ -51,23 +63,25 @@
             <input type="hidden" name="styles" value="{{ record.styles }}">
             <input type="hidden" name="labels" value="{{ record.labels }}">
             <input type="hidden" name="formats" value="{{ record.formats }}">
+            
             {{ record.tracklist|json_script:"tracklist-data" }}
             <input type="hidden" name="tracklist_json" id="tracklist-json-input">
+
             {% if is_in_collection %}
                 <button type="submit" class="collection-btn" disabled>
                     <i class="fa-slab-press fa-regular fa-plus"></i> Ya está en tu colección
                 </button>
             {% else %}
-                <button type="submit" class="collection-btn" {% if is_in_collection %}disabled{% endif %}>
+                <button type="submit" class="collection-btn">
                     <i class="fa-slab-press fa-regular fa-plus"></i> Añadir a mi colección
                 </button>
             {% endif %}
         </form>
 
-        <!-- Verificación para asegurarse de que 'is_in_collection' esté pasando correctamente -->
         <script>
             console.log("Está en la colección:", "{{ is_in_collection }}");
         </script>
+
         {% if is_in_wishlist %}
             <button class="wishlist-btn" disabled>
                 <i class="fas fa-heart"></i> Ya está en tu wishlist
@@ -171,157 +185,124 @@
              
 </div>
 
-    <script>
-    document.querySelectorAll(".custom-player").forEach(player => {
-        const playBtn = player.querySelector(".play-btn");
-        const icon = playBtn.querySelector("i");
-        const progress = player.querySelector(".progress");
-        let audio = null;
-        let isPlaying = false;
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Pasar artistas en JSON
+    const artists = JSON.parse(document.getElementById("artists-data").textContent);
+    document.getElementById("artists-json-input").value = JSON.stringify(artists);
 
-        playBtn.addEventListener("click", async () => {
-            if (!audio) {
-                const id = player.dataset.id;
-                const response = await fetch(`/search/ajax/preview/${id}/`);
-                const data = await response.json();
+    // Pasar tracklist en JSON
+    const tracklist = JSON.parse(document.getElementById("tracklist-data").textContent);
+    document.getElementById("tracklist-json-input").value = JSON.stringify(tracklist);
+});
+</script>
 
-                if (!data.preview) {
-                    icon.classList.remove("fa-play");
-                    icon.classList.add("fa-ban");
-                    return;
-                }
+<script>
+document.querySelectorAll(".custom-player").forEach(player => {
+    const playBtn = player.querySelector(".play-btn");
+    const icon = playBtn.querySelector("i");
+    const progress = player.querySelector(".progress");
+    let audio = null;
+    let isPlaying = false;
 
-                audio = new Audio(data.preview);
-                audio.preload = "none";
-                player.appendChild(audio);
-                setupAudioEvents(audio, icon, progress);
+    playBtn.addEventListener("click", async () => {
+        if (!audio) {
+            const id = player.dataset.id;
+            const response = await fetch(`/search/ajax/preview/${id}/`);
+            const data = await response.json();
+
+            if (!data.preview) {
+                icon.classList.remove("fa-play");
+                icon.classList.add("fa-ban");
+                return;
             }
 
-            document.querySelectorAll("audio").forEach(a => a.pause());
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                audio.play();
-            }
-        });
+            audio = new Audio(data.preview);
+            audio.preload = "none";
+            player.appendChild(audio);
+            setupAudioEvents(audio, icon, progress);
+        }
 
-        function setupAudioEvents(audio, icon, progress) {
-            audio.addEventListener("play", () => {
-                isPlaying = true;
-                icon.classList.replace("fa-play", "fa-pause");
-            });
-
-            audio.addEventListener("pause", () => {
-                isPlaying = false;
-                icon.classList.replace("fa-pause", "fa-play");
-            });
-
-            audio.addEventListener("timeupdate", () => {
-                const percentage = (audio.currentTime / audio.duration) * 100;
-                progress.style.width = percentage + "%";
-            });
-
-            audio.addEventListener("ended", () => {
-                isPlaying = false;
-                icon.classList.replace("fa-pause", "fa-play");
-                progress.style.width = "0%";
-            });
+        document.querySelectorAll("audio").forEach(a => a.pause());
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
         }
     });
-    </script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const lazyPlayers = document.querySelectorAll(".custom-player");
-        
-                if ("IntersectionObserver" in window) {
-                    let observer = new IntersectionObserver((entries, observer) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                const player = entry.target;
-                                if (!player.querySelector("audio")) { 
-                                    const audio = document.createElement("audio");
-                                    audio.src = player.getAttribute("data-src");
-                                    audio.preload = "none";
-                                    player.appendChild(audio);
-                                }
-                                observer.unobserve(player);
-                            }
-                        });
-                    }, {
-                        rootMargin: "100px"
-                    });
-        
-                    lazyPlayers.forEach(player => observer.observe(player));
-                } else {
-                    lazyPlayers.forEach(player => {
-                        const audio = document.createElement("audio");
-                        audio.src = player.getAttribute("data-src");
-                        audio.preload = "none";
-                        player.appendChild(audio);
-                    });
-                }
-            });
-        </script>
-        <script id="masterId" type="application/json">{{ record.master_id }}</script>
 
-        {{ record.master_id|json_script:"masterId" }}
-        <script>
-            const masterId = JSON.parse(document.getElementById("masterId").textContent);
-            const container = document.getElementById("versions-container");
-            const loadMoreBtn = document.getElementById("load-more");
-
-            let offset = 0;
-            const limit = 12;
-
-            async function fetchAndRenderVersions() {
-                loadMoreBtn.disabled = true;
-                loadMoreBtn.textContent = "Cargando...";
-
-                const res = await fetch(`/search/ajax/load_versions/?master_id=${masterId}&offset=${offset}&limit=${limit}`);
-                const data = await res.json();
-
-                if (data.versions && data.versions.length) {
-                    data.versions.forEach(v => {
-                        const link = document.createElement("a");
-                        link.href = `/search/record/detail/?release_id=${v.id}`;
-                        link.classList.add("version-card-link");
-
-                        const card = document.createElement("div");
-                        card.classList.add("version-card");
-                        card.innerHTML = `
-                            <p><strong>Año:</strong> ${v.year}</p>
-                            <p><strong>País:</strong> ${v.country}</p>
-                            <p><strong>Formato:</strong> ${v.format}</p>
-                            <p><strong>Sello:</strong> ${v.label}</p>
-                            <p><strong>Código de barras:</strong> ${v.barcode}</p>
-                        `;
-                        link.appendChild(card);
-                        container.appendChild(link);
-                    });
-
-                    offset += limit;
-                    loadMoreBtn.disabled = false;
-                    loadMoreBtn.textContent = "Cargar más versiones";
-                } else {
-                    loadMoreBtn.style.display = "none";
-                }
-            }
-
-            loadMoreBtn.addEventListener("click", fetchAndRenderVersions);
-            fetchAndRenderVersions();
-        </script>
-
-        <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const data = JSON.parse(document.getElementById("tracklist-data").textContent);
-            document.getElementById("tracklist-json-input").value = JSON.stringify(data);
+    function setupAudioEvents(audio, icon, progress) {
+        audio.addEventListener("play", () => {
+            isPlaying = true;
+            icon.classList.replace("fa-play", "fa-pause");
         });
-        </script>
-        
-        
-        
-            
-                    
-                
-        
+
+        audio.addEventListener("pause", () => {
+            isPlaying = false;
+            icon.classList.replace("fa-pause", "fa-play");
+        });
+
+        audio.addEventListener("timeupdate", () => {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = percentage + "%";
+        });
+
+        audio.addEventListener("ended", () => {
+            isPlaying = false;
+            icon.classList.replace("fa-pause", "fa-play");
+            progress.style.width = "0%";
+        });
+    }
+});
+</script>
+
+<script id="masterId" type="application/json">{{ record.master_id }}</script>
+
+{{ record.master_id|json_script:"masterId" }}
+<script>
+    const masterId = JSON.parse(document.getElementById("masterId").textContent);
+    const container = document.getElementById("versions-container");
+    const loadMoreBtn = document.getElementById("load-more");
+
+    let offset = 0;
+    const limit = 12;
+
+    async function fetchAndRenderVersions() {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = "Cargando...";
+
+        const res = await fetch(`/search/ajax/load_versions/?master_id=${masterId}&offset=${offset}&limit=${limit}`);
+        const data = await res.json();
+
+        if (data.versions && data.versions.length) {
+            data.versions.forEach(v => {
+                const link = document.createElement("a");
+                link.href = `/search/record/detail/?release_id=${v.id}`;
+                link.classList.add("version-card-link");
+
+                const card = document.createElement("div");
+                card.classList.add("version-card");
+                card.innerHTML = `
+                    <p><strong>Año:</strong> ${v.year}</p>
+                    <p><strong>País:</strong> ${v.country}</p>
+                    <p><strong>Formato:</strong> ${v.format}</p>
+                    <p><strong>Sello:</strong> ${v.label}</p>
+                    <p><strong>Código de barras:</strong> ${v.barcode}</p>
+                `;
+                link.appendChild(card);
+                container.appendChild(link);
+            });
+
+            offset += limit;
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = "Cargar más versiones";
+        } else {
+            loadMoreBtn.style.display = "none";
+        }
+    }
+
+    loadMoreBtn.addEventListener("click", fetchAndRenderVersions);
+    fetchAndRenderVersions();
+</script>
+
 {% endblock %}

@@ -10,5 +10,4 @@ urlpatterns = [
     path('faq/', TemplateView.as_view(template_name="main/faq.html"), name="faq"),
     path('terms/', TemplateView.as_view(template_name="main/terms.html"), name="terms"),
     path('load-versions/<int:master_id>/', record_views.load_versions, name='load_versions'),
-    path('recomendaciones/', views.recomendaciones_view, name='recomendaciones'),
 ]

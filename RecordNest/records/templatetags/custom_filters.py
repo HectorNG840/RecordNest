@@ -34,3 +34,7 @@ def smart_range(current_page, total_pages):
         page_list.append(total_pages)
 
     return page_list
+
+@register.filter
+def zip_lists(list1, list2):
+    return zip(list1, list2)

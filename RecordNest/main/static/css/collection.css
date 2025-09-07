@@ -720,13 +720,23 @@ body {
 .sort-icon {
   opacity: 0.5;
 }
+.recs-btn-container {
+  margin: 0 4rem 2rem;
+}
 
+.recs-btn {
+  display: inline-block;
+  background-color: #65c18c;
+  color: #fff;
+  font-weight: bold;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
 
-
-
-
-
-
-
-
-
+.recs-btn:hover {
+  background-color: #4aa46c;
+  transform: translateY(-2px);
+}

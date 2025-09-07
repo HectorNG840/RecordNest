@@ -27,5 +27,5 @@ oauth = OAuth1Session(
 )
 access_token_response = oauth.fetch_access_token(ACCESS_TOKEN_URL)
 
-print("✅ ACCESS TOKEN:", access_token_response['oauth_token'])
-print("✅ ACCESS SECRET:", access_token_response['oauth_token_secret'])
+print("ACCESS TOKEN:", access_token_response['oauth_token'])
+print("ACCESS SECRET:", access_token_response['oauth_token_secret'])
