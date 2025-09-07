@@ -7,6 +7,7 @@ from records.views import get_discogs_client
 from collections import Counter
 from users.models import CustomUser as User
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.contrib.auth.decorators import login_required
 
 def most_added_records(request):
     most_added_qs = (
@@ -79,9 +80,7 @@ def most_wished_records(request):
 
     master_ids = [(item['discogs_master_id'], item['total_wished']) for item in most_wished]
 
-    # Usamos ThreadPoolExecutor para hacer las peticiones concurrentemente
     with ThreadPoolExecutor(max_workers=10) as executor:
-        # Ejecutamos las tareas en paralelo
         most_wished_data = list(executor.map(lambda x: fetch_master_details(x[0], x[1]), master_ids))
 
     context = {
@@ -126,7 +125,7 @@ def top_records(request):
             .annotate(total=Count('id'))
             .order_by('-total')[:10]
         )
-        title = "Top 10 Discos más añadidos a la colección"
+        title = "Top 10 Discos más añadidos a las colecciones"
 
     else:
 
@@ -165,14 +164,13 @@ def top_records(request):
     return render(request, 'stats/top_records.html', context)
 
 
-
+@login_required
 def statistics(request):
     user = request.user
     now = datetime.now()
 
-    # ------------------------
     # Estadísticas personales
-    # ------------------------
+
     total_added = UserRecord.objects.filter(user=user).count()
     total_wished = Wishlist.objects.filter(user=user).count()
 
@@ -185,7 +183,6 @@ def statistics(request):
         .order_by('added_at__year', 'added_at__month')
     )
 
-    # Preparar datos para el gráfico
     monthly_labels = []
     monthly_values = []
     for r in records_per_month_qs:
@@ -196,16 +193,12 @@ def statistics(request):
 
     yearly_added = sum([r['count'] for r in records_per_month_qs if r['added_at__year'] == now.year])
 
-    # ------------------------
     # Estadísticas generales
-    # ------------------------
     total_users = User.objects.count()
     total_records = UserRecord.objects.count()
     total_wishes = Wishlist.objects.count()
 
-    # ------------------------
     # Estilos más frecuentes del usuario
-    # ------------------------
     user_records = UserRecord.objects.filter(user=user)
     style_list = []
     for r in user_records:
@@ -217,9 +210,8 @@ def statistics(request):
     user_styles_labels = [x['name'] for x in user_styles]
     user_styles_values = [x['count'] for x in user_styles]
 
-    # ------------------------
     # Comparación global de estilos
-    # ------------------------
+
     all_records = UserRecord.objects.all()
     global_styles_list = []
     for r in all_records:
@@ -231,9 +223,7 @@ def statistics(request):
     global_styles_labels = [x['name'] for x in global_styles]
     global_styles_values = [x['count'] for x in global_styles]
 
-    # ------------------------
     # Discos añadidos globalmente por mes/año
-    # ------------------------
     global_records_per_month_qs = (
         UserRecord.objects
         .values('added_at__year', 'added_at__month')
@@ -249,45 +239,37 @@ def statistics(request):
         global_monthly_labels.append(f"{year}-{month:02d}")
         global_monthly_values.append(r['count'])
 
-    # ------------------------
     # Artistas más frecuentes globales
-    # ------------------------
+
     global_artist_list = []
     for r in all_records:
-        if r.artists:
-            global_artist_list.extend([a.strip() for a in r.artists.split(',')])
+        global_artist_list.extend([a.name for a in r.artists.all()])
 
     global_artist_counts = Counter(global_artist_list)
     global_top_artists = [{'name': a, 'count': c} for a, c in global_artist_counts.most_common(5)]
     global_artist_labels = [x['name'] for x in global_top_artists]
     global_artist_values = [x['count'] for x in global_top_artists]
 
-    # ------------------------
     # Top discos añadidos
-    # ------------------------
+
     top_added_records = (
         UserRecord.objects
         .values('title', 'artists', 'cover_image')
         .annotate(total=Count('id'))
         .order_by('-total')[:10]
     )
-
-    # ------------------------
     # Artistas más frecuentes del usuario
-    # ------------------------
+
     artist_list = []
     for r in user_records:
-        if r.artists:
-            artist_list.extend([a.strip() for a in r.artists.split(',')])
+        artist_list.extend([a.name for a in r.artists.all()])
 
     artist_counts = Counter(artist_list)
     top_artists = [{'name': a, 'count': c} for a, c in artist_counts.most_common(5)]
     artist_labels = [x['name'] for x in top_artists]
     artist_values = [x['count'] for x in top_artists]
 
-    # ------------------------
     # Contexto final
-    # ------------------------
 
     context = {
         'total_added': total_added,

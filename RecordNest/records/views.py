@@ -15,7 +15,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests_oauthlib import OAuth1Session
 from django.conf import settings
 from math import ceil
-from collection.models import Wishlist
+from collection.models import Wishlist, Artist
+from collection.models import UserRecord
 import time
 import requests
 from discogs_client.exceptions import HTTPError
@@ -99,7 +100,7 @@ def search(request):
         results = data.get("results", [])
         total_pages = data.get("pagination", {}).get("pages", 1)
         if not results and total_pages > 1:
-            time.sleep(0.6)  # darle tiempo al servidor
+            time.sleep(0.6)
             response = session.get(url, params=params)
             data = response.json()
             results = data.get("results", [])
@@ -115,7 +116,6 @@ def search(request):
 
         processed_results.extend(artist_items)
 
-        # MASTERS
         for result in master_results:
             title = result.get("title", "Desconocido")
             if " - " in title:
@@ -182,7 +182,6 @@ def record_detail(request):
     session = get_oauth_session()
 
     try:
-        # Comprobar si el disco tiene master_id o release_id
         if master_id:
             d = get_discogs_client()
             master = d.master(master_id)
@@ -207,11 +206,9 @@ def record_detail(request):
             release = master.main_release
             release.refresh()
             release = release.data
+            master_id = master.id
+            release_id = release.get("id")
 
-            master_id = master.id  # Obtener master_id si no estaba presente
-            release_id = release.get("id")  # Asegurarse de obtener el release_id
-
-        # Validación de fallback para otros campos
         if not clean_artist:
             artist_data = release.get("artists", [])
             clean_artist = re.sub(r"\s*\(\d+\)$", "", artist_data[0].get("name", "").strip()) if artist_data else "Unknown Artist"
@@ -220,7 +217,6 @@ def record_detail(request):
 
         images = [img['uri'] for img in release.get('images', []) if img.get('uri')]
 
-        # Tracklist
         tracklist = []
         for track in release.get("tracklist", []):
             track_title = track.get("title", "Unknown")
@@ -271,11 +267,13 @@ def record_detail(request):
             })
 
         tracklist.sort(key=lambda track: track_position_key(track.get("position", "")))
+        artists = release.get("artists", [])
+        artist_ids = [a.get("id") for a in artists]
 
-        # Datos del disco para pasar a la plantilla
         record = {
             'title': release.get("title", "Sin título"),
-            'artists': ', '.join(a['name'] for a in release.get("artists", [])) or "Desconocido",
+            'artists': [{"name": a.get("name"), "id": a.get("id")} for a in artists] or [{"name": "Desconocido", "id": None}],
+            'artist_ids': artist_ids,
             'images': images,
             'year': release.get("year", "Desconocido"),
             'avg_rating': release.get("community", {}).get("rating", {}).get("average", "N/A"),
@@ -289,36 +287,43 @@ def record_detail(request):
             'formats': ', '.join(fmt.get('name') for fmt in release.get('formats', [])) or 'Desconocido',
             'tracklist': tracklist,
             'versions': [],
-            'master_id': master_id,  # Pasamos master_id aquí
-            'release_id': release_id or release.get("id"),  # Asegurarse de pasar el release_id
+            'master_id': master_id,
+            'release_id': release_id or release.get("id"),
             'record_id': release_id or release.get("id")
         }
 
-        # Verificar si el disco está en la wishlist
-        is_in_wishlist = False
+        #Comprobar coleccion
+        is_in_collection = False
         if request.user.is_authenticated:
-            print(f"Verificando si el disco con master_id: {master_id} o release_id: {release_id} está en la wishlist.")
+            artist_obj = Artist.objects.filter(name=clean_artist).first()
+            if artist_obj:
+                is_in_collection = UserRecord.objects.filter(
+                    user=request.user,
+                    title=title,
+                    year=release.get("year", ""),
+                    artists=artist_obj
+                ).exists()
+
+        # Wishlist
+        is_in_wishlist = False
+        print(f"artist_ids: {artist_ids}")
+        if request.user.is_authenticated:
             is_in_wishlist = Wishlist.objects.filter(user=request.user, discogs_master_id=master_id).exists() or \
                              Wishlist.objects.filter(user=request.user, discogs_release_id=release_id).exists()
 
-            print(f"¿Está en la wishlist? {is_in_wishlist}")
-
-        return render(request, 'records/record_detail.html', {'record': record, 'is_in_wishlist': is_in_wishlist,})
+        return render(request, 'records/record_detail.html', {
+            'record': record,
+            'is_in_wishlist': is_in_wishlist,
+            'is_in_collection': is_in_collection,
+            'artist_ids': artist_ids
+        })
 
     except Exception as e:
         print(f"❌ Error en record_detail: {e}")
-        return render(request, 'records/record_detail.html', {'record': {}, 'error': str(e)})
-
-
-
-
-
-
-
-
-
-
-
+        return render(request, 'records/record_detail.html', {
+            'record': {},
+            'error': str(e)
+        })
 
 
 def extract_version_data(rel):
@@ -392,8 +397,3 @@ def load_versions(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
-
-
-
-

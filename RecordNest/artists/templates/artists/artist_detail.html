@@ -19,29 +19,46 @@
     </div>
   </div>
 
-  <!-- Selector de modo -->
+  <!-- Barra de búsqueda -->
+  <div class="search-container">
+      <form method="get" action="">
+          <!-- Los parámetros 'id' y 'mode' se mantienen en la URL -->
+          <input type="hidden" name="id" value="{{ artist.id }}">
+          <input type="hidden" name="mode" value="{{ mode }}">
+          
+          <!-- Campo de búsqueda -->
+          <input type="text" name="search" id="search-input" placeholder="Buscar discos..." value="{{ search }}">
+          
+          <button type="submit"><i class="fas fa-search"></i> Buscar</button>
+      </form>
+  </div>
+
+  <!-- Selector de modo (ocultarlo si hay búsqueda) -->
+  {% if not hide_mode_buttons %}
   <div class="mode-toggle">
     <a href="?id={{ artist.id }}&mode=main" class="{% if mode == 'main' %}active{% endif %}">Discografía principal</a>
     <a href="?id={{ artist.id }}&mode=appearances" class="{% if mode == 'appearances' %}active{% endif %}">Apariciones</a>
   </div>
-
+  {% endif %}
 
   <!-- Título -->
-  <h2>{{ mode|yesno:"Discografía principal,Apariciones" }}</h2>
+  <h2>{% if search %}Resultados de la búsqueda{% else %}{{ mode|yesno:"Discografía principal,Apariciones" }}{% endif %}</h2>
 
   <!-- Rejilla de discos -->
   <div class="grid-container" id="release-grid">
     {% for release in releases %}
       <a href="{% if release.type == 'master' %}{% url 'record_detail' %}?master_id={{ release.id }}{% elif release.type == 'release' %}{% url 'record_detail' %}?release_id={{ release.id }}{% endif %}"
-         class="card-link release-card"
-         data-title="{{ release.title|lower }}"
-         data-year="{{ release.year|default:'0' }}">
+        class="card-link release-card"
+        data-title="{{ release.title|lower }}"
+        data-year="{{ release.year|default:'0' }}">
         <div class="card">
           <div class="image-container">
             <img src="{{ release.cover_image|default:'/static/images/placeholder-image.png' }}" alt="{{ release.title }}">
           </div>
           <div class="card-body">
-            <h3 class="card-title">{{ release.title }}</h3>
+            <h3 class="card-title">
+              {{ release.title|default:'' }}
+            </h3>
             <p><strong>Año:</strong> {{ release.year|default:"N/A" }}</p>
           </div>
         </div>
@@ -51,15 +68,16 @@
     {% endfor %}
   </div>
 
+
   <!-- Paginación -->
   {% if total_pages > 1 %}
     <div class="pagination">
       {% if has_previous %}
-        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ previous_page_number }}">&laquo; Anterior</a>
+        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ previous_page_number }}&search={{ search }}">&laquo; Anterior</a>
       {% endif %}
       <span>Página {{ current_page }} de {{ total_pages }}</span>
       {% if has_next %}
-        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ next_page_number }}">Siguiente &raquo;</a>
+        <a href="?id={{ artist.id }}&mode={{ mode }}&page={{ next_page_number }}&search={{ search }}">Siguiente &raquo;</a>
       {% endif %}
     </div>
   {% endif %}
@@ -68,30 +86,7 @@
 
 <script>
   const searchInput = document.getElementById("search-input");
-  const yearRange = document.getElementById("year-range");
-  const yearLabel = document.getElementById("year-label");
   const cards = document.querySelectorAll(".release-card");
-
-  function updateFilters() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const year = parseInt(yearRange.value);
-
-    cards.forEach(card => {
-      const title = card.dataset.title;
-      const cardYear = parseInt(card.dataset.year);
-      const matchesTitle = title.includes(searchTerm);
-      const matchesYear = isNaN(cardYear) || cardYear <= year;
-      card.style.display = (matchesTitle && matchesYear) ? "" : "none";
-    });
-  }
-
-  function updateYearLabel(value) {
-    yearLabel.textContent = value === "2100" ? "Todos" : value;
-    updateFilters();
-  }
-
-  searchInput.addEventListener("input", updateFilters);
-  yearRange.addEventListener("input", updateFilters);
 </script>
 
 {% endblock %}

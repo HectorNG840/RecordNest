@@ -11,10 +11,18 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
     
+class Artist(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    discogs_id = models.CharField(max_length=20, blank=True, null=True, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class UserRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    artists = models.CharField(max_length=255)
+    artists = models.ManyToManyField(Artist, related_name="records")
     year = models.CharField(max_length=10, blank=True)
     cover_image = models.URLField(blank=True)
     released = models.CharField(max_length=20, blank=True)
@@ -27,6 +35,7 @@ class UserRecord(models.Model):
     formats = models.TextField(blank=True)
     added_at = models.DateTimeField(auto_now_add=True)
     tracklist_JSON = models.JSONField(default=list, blank=True)
+
 
 
 class Wishlist(models.Model):
@@ -74,4 +83,28 @@ class RecordList(models.Model):
 
     def __str__(self):
         return self.name
+    
+class CachedMaster(models.Model):
+    master_id = models.CharField(max_length=20, unique=True)
+    data = models.JSONField()
+    fetched_at = models.DateTimeField(auto_now=True)
+
+class CachedRelease(models.Model):
+    release_id = models.CharField(max_length=50, unique=True)
+    data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ExcludedRecommendation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    master_id = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class UserProfileEmbedding(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile_embedding")
+    vector = models.JSONField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Perfil embedding de {self.user.username}"
+
 

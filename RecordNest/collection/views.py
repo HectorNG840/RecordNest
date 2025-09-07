@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .forms import RecordListForm
-from .models import UserRecord, Track, Tag, RecordList, Wishlist
+from .models import UserRecord, Track, Tag, RecordList, Wishlist, ExcludedRecommendation, Artist
 import json
 import requests
 from django.http import JsonResponse
@@ -14,6 +14,9 @@ from django.core.exceptions import PermissionDenied
 import discogs_client
 from django.conf import settings
 from discogs_client.exceptions import HTTPError
+from .recommender_semantic import recommend_records
+from records.views import get_oauth_session, track_position_key
+from collections import Counter
 
 def get_discogs_client():
     return discogs_client.Client(
@@ -32,7 +35,6 @@ def add_to_collection(request):
         user_record = UserRecord.objects.create(
             user=request.user,
             title=data.get("title"),
-            artists=data.get("artists"),
             year=data.get("year", ""),
             cover_image=data.get("cover_image", ""),
             released=data.get("released", ""),
@@ -44,16 +46,65 @@ def add_to_collection(request):
             formats=data.get("formats", ""),
         )
 
+        artists_raw = request.POST.get("artists", "[]")
+        try:
+            artists_data = json.loads(artists_raw)
+        except json.JSONDecodeError:
+            artists_data = []
+        print("data:", artists_data)
+
+        artist_objs = []
+        for a in artists_data:
+            if isinstance(a, dict):
+                name = a.get("name", "").strip()
+                discogs_id = a.get("id")
+                if discogs_id is not None:
+                    discogs_id = str(discogs_id)
+            else:
+                name = str(a).strip()
+                discogs_id = None
+
+            if not name:
+                continue
+
+            artist = None
+
+            if discogs_id:
+                artist = Artist.objects.filter(discogs_id=discogs_id).first()
+                if artist:
+                    if artist.name != name:
+                        artist.name = name
+                        artist.save()
+
+            if not artist:
+                artist = Artist.objects.filter(name=name).first()
+                if artist:
+
+                    if discogs_id and not artist.discogs_id:
+                        artist.discogs_id = discogs_id
+                        artist.save()
+
+            if not artist:
+                artist = Artist.objects.create(name=name, discogs_id=discogs_id)
+
+            artist_objs.append(artist)
+        print("artist_object:", artist_objs)
+        if artist_objs:
+            print("Antes de set():", user_record.artists.all())  # Debería estar vacío
+            user_record.artists.set(artist_objs)
+            print("Después de set():", user_record.artists.all())
+
         tag_names = [t.strip() for t in data.get("tags", "").split(",") if t.strip()]
         tag_objs = []
         for name in tag_names:
             tag, _ = Tag.objects.get_or_create(name=name, user=request.user)
             tag_objs.append(tag)
-        user_record.tags.set(tag_objs)
+        if tag_objs:
+            user_record.tags.set(tag_objs)
 
         try:
             tracklist_raw = request.POST.get("tracklist_json")
-            print("📥 tracklist_json raw:", tracklist_raw)
+            print("tracklist_json raw:", tracklist_raw)
             tracklist_data = json.loads(tracklist_raw)
             for t in tracklist_data:
                 Track.objects.create(
@@ -66,12 +117,13 @@ def add_to_collection(request):
                     deezer_artists=", ".join(t.get("deezer_artists", [])),
                     deezer_id=t.get("id", "")
                 )
-                print(f"✅ Track guardado: {t.get('title')}")
         except json.JSONDecodeError as e:
-            print("❌ Error decoding tracklist JSON:", e)
+            print("Error decoding tracklist JSON:", e)
 
         return redirect("my_collection")
+
     return HttpResponseBadRequest("Solicitud inválida")
+
 
 @login_required
 def delete_from_collection(request, record_id):
@@ -79,14 +131,15 @@ def delete_from_collection(request, record_id):
         record = get_object_or_404(UserRecord, id=record_id, user=request.user)
         record.delete()
         return redirect("my_collection")
-    return HttpResponseBadRequest("Solicitud inválida") 
+    return HttpResponseBadRequest("Solicitud inválida")
+
 
 @login_required
 def my_collection(request):
     user = request.user
     tag_id = request.GET.get("tag")
     sort = request.GET.get("sort", "added_at")
-    order = request.GET.get("order", "desc") 
+    order = request.GET.get("order", "desc")
 
     records = UserRecord.objects.filter(user=user)
 
@@ -96,8 +149,11 @@ def my_collection(request):
         except ValueError:
             pass
 
-    if sort in ['title', 'artists', 'year', 'added_at']:
-        sort_field = sort if order == 'asc' else f'-{sort}'
+    if sort == "artists":
+        sort_field = "artists__name" if order == "asc" else "-artists__name"
+        records = records.order_by(sort_field).distinct()
+    elif sort in ["title", "year", "added_at"]:
+        sort_field = sort if order == "asc" else f"-{sort}"
         records = records.order_by(sort_field)
 
     user_lists = RecordList.objects.filter(user=user)
@@ -112,16 +168,12 @@ def my_collection(request):
         "user_lists": user_lists,
     })
 
-
-
 @login_required
 def local_record_detail(request, record_id):
     record = get_object_or_404(UserRecord, id=record_id, user=request.user)
-    tracks = record.tracks.all().order_by("position")
-
+    tracks = sorted(record.tracks.all(), key=lambda t: track_position_key(t.position or ""))
     user_tags = Tag.objects.filter(user=request.user)
 
-    
     return render(request, "records/local_record_detail.html", {
         "record": record,
         "tracks": tracks,
@@ -249,8 +301,6 @@ def edit_list(request, list_id):
     })
 
 
-
-
 @login_required
 def list_detail(request, list_id):
     record_list = get_object_or_404(RecordList, id=list_id)
@@ -361,14 +411,12 @@ def add_to_wishlist(request, discogs_id):
 
 
 
-# Eliminar de wishlist
 @login_required
 def remove_from_wishlist(request, wishlist_id):
-    # Verificar que el usuario está autenticado
     if not request.user.is_authenticated:
-        return redirect('login')  # Redirigir a login si el usuario no está autenticado
+        return redirect('login')
 
-    # Recuperar el objeto de la wishlist usando el ID
+
     wishlist_item = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
     
 
@@ -380,17 +428,15 @@ def remove_from_wishlist(request, wishlist_id):
 
 @login_required
 def user_wishlist(request):
-
     wishlist_items = Wishlist.objects.filter(user=request.user)
-
-
     records = []
 
     for item in wishlist_items:
         try:
+            d = get_discogs_client()
+
             if item.discogs_master_id:
                 print(f"Recuperando disco con master_id: {item.discogs_master_id}")
-                d = get_discogs_client()
                 master = d.master(item.discogs_master_id)
                 release = master.main_release
                 release.refresh()
@@ -399,19 +445,18 @@ def user_wishlist(request):
 
                 record = {
                     'title': release.title if release.title else "Sin título",
-                    'artists': ', '.join(artist.name for artist in release.artists) if release.artists else "Desconocido",
+                    'artists': [artist.name for artist in release.artists] if release.artists else [],
                     'year': release.year if release.year else "Desconocido",
-                    'genres': ', '.join(release.genres) if release.genres else "Desconocidos",
-                    'formats': ', '.join(fmt['name'] for fmt in release.formats) if release.formats else "Desconocido",
+                    'genres': list(release.genres) if release.genres else [],
+                    'formats': [fmt['name'] for fmt in release.formats] if release.formats else [],
                     'cover_image': cover_image,
                     'master_id': item.discogs_master_id,
-                    'wishlist_id': item.id  
+                    'wishlist_id': item.id
                 }
                 records.append(record)
 
             elif item.discogs_release_id:
                 print(f"Recuperando disco con release_id: {item.discogs_release_id}")
-                d = get_discogs_client()
                 release = d.release(item.discogs_release_id)
                 release.refresh()
 
@@ -419,13 +464,13 @@ def user_wishlist(request):
 
                 record = {
                     'title': release.title if release.title else "Sin título",
-                    'artists': ', '.join(artist.name for artist in release.artists) if release.artists else "Desconocido",
+                    'artists': [artist.name for artist in release.artists] if release.artists else [],
                     'year': release.year if release.year else "Desconocido",
-                    'genres': ', '.join(release.genres) if release.genres else "Desconocidos",
-                    'formats': ', '.join(fmt['name'] for fmt in release.formats) if release.formats else "Desconocido",
+                    'genres': list(release.genres) if release.genres else [],
+                    'formats': [fmt['name'] for fmt in release.formats] if release.formats else [],
                     'cover_image': cover_image,
                     'release_id': item.discogs_release_id,
-                    'wishlist_id': item.id 
+                    'wishlist_id': item.id
                 }
                 records.append(record)
 
@@ -436,16 +481,44 @@ def user_wishlist(request):
     return render(request, 'collection/user_wishlist.html', {'records': records})
 
 
+@login_required
+def recommendations(request):
+    user = request.user
+    user_records = UserRecord.objects.filter(user=user)
+
+    if not user_records.exists():
+        return JsonResponse(
+            {"error": "Tu colección está vacía, añade discos para obtener recomendaciones."},
+            status=400
+        )
+
+    try:
+        recs = recommend_records(user, top_n=10)
+        return JsonResponse({"recommendations": recs})
+    except Exception as e:
+        return JsonResponse(
+            {"error": f"Ocurrió un error en el sistema de recomendaciones: {str(e)}"},
+            status=500
+        )
+    
+@login_required
+def recommendations_api(request):
+    limit = int(request.GET.get("limit", 12))
+    user = request.user
+    recs = recommend_records(user, top_n=limit)
+
+    return JsonResponse({"recommendations": recs})
+    
+@login_required
+def recommendations_page(request):
+    return render(request, "collection/recommendations.html")
 
 
-
-
-
-
-
-
-
-
-
-
-
+@login_required
+def exclude_recommendation(request, master_id):
+    if request.method == "POST":
+        ExcludedRecommendation.objects.get_or_create(
+            user=request.user,
+            master_id=master_id
+        )
+    return redirect("recommendations_semantic")

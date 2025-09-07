@@ -1,0 +1,98 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Recomendaciones{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/recommendations.css' %}">
+
+<section class="recommend-section">
+  <h2 class="recommend-title">Recomendaciones para ti</h2>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p>Generando recomendaciones...</p>
+  </div>
+
+  <div id="recommendations-container" class="recommend-grid"></div>
+
+
+  <div class="load-more">
+    <button id="load-more-btn" class="btn-load-more">Cargar más recomendaciones</button>
+  </div>
+</section>
+
+<script>
+let limit = 12; // inicial
+const overlay = document.getElementById("loading-overlay");
+const container = document.getElementById("recommendations-container");
+const loadMoreBtn = document.getElementById("load-more-btn");
+
+function renderRecommendations(recs) {
+  container.innerHTML = "";
+  recs.forEach(rec => {
+    const card = document.createElement("div");
+    card.className = "recommend-card";
+    card.innerHTML = `
+      <a href="{% url 'record_detail' %}?${rec.master_id ? `master_id=${rec.master_id}` : `release_id=${rec.release_id}`}" class="card-link">
+        <div class="recommend-badge">⭐ Recomendado</div>
+        <div class="recommend-image">
+          <img src="${rec.cover_image || '/static/images/placeholder-record.png'}" 
+               alt="${rec.title}" 
+               class="recommend-cover">
+        </div>
+        <div class="recommend-body">
+          <h3 class="recommend-record-title">${rec.title}</h3>
+          <p><strong>Artista:</strong> ${rec.artists}</p>
+          <p><strong>Año:</strong> ${rec.year || "Desconocido"}</p>
+          <p><strong>Géneros:</strong> ${rec.genres || "Desconocidos"}</p>
+          <p><strong>Estilos:</strong> ${rec.styles || "-"}</p>
+          <p><strong>Similitud:</strong> ${rec.similarity}</p>
+          <p><strong>Razón:</strong> ${rec.reason || "Relacionado con tu colección"}</p>
+        </div>
+      </a>
+      <div class="card-options">
+        <button class="menu-btn" type="button" onclick="toggleMenu(this)">⋮</button>
+        <div class="dropdown-menu">
+          <form method="post" action="/recommendations/exclude/${rec.master_id}/">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-option-btn dropdown-danger">
+              Excluir de recomendaciones
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+
+async function loadRecommendations() {
+  overlay.style.display = "flex";
+  const response = await fetch(`/collection/api/recommendations/?limit=${limit}`);
+  const data = await response.json();
+  overlay.style.display = "none";
+  renderRecommendations(data.recommendations);
+}
+
+loadMoreBtn.addEventListener("click", () => {
+  limit += 6;
+  loadRecommendations();
+});
+
+loadRecommendations();
+
+function toggleMenu(btn) {
+  const menu = btn.nextElementSibling;
+  menu.classList.toggle("show");
+}
+
+window.addEventListener("click", function(e) {
+  if (!e.target.matches(".menu-btn")) {
+    document.querySelectorAll(".dropdown-menu.show").forEach(menu => menu.classList.remove("show"));
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,4 +1,4 @@
-body {
+html,body {
   background-color: #111;
   font-family: "Segoe UI", sans-serif;
   margin: 0;
@@ -42,7 +42,8 @@ header {
   align-items: center;
   gap: 2rem;
 }
-.nav-links a {
+.nav-links a,
+.nav-links .dropbtn {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 500;
@@ -53,6 +54,7 @@ header {
   background: none;
   border: none;
   cursor: pointer;
+  font-family: inherit;
 }
 .nav-links a:hover,
 .dropbtn:hover {
@@ -63,16 +65,6 @@ header {
 .dropdown {
   position: relative;
   display: inline-block;
-}
-.dropbtn {
-  background: none;
-  border: none;
-  color: #e0e0e0;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
-  cursor: pointer;
 }
 
 .dropbtn i {
@@ -509,5 +501,20 @@ footer {
   background-color: #2a2a3a;
   color: #c4c4ff;
   border: 1px solid #667;
+}
+.third-party-note {
+    display: block;
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 5px;
+}
+footer a {
+    color: #aed6b2;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #7fa282;
+    text-decoration: underline;
 }
 

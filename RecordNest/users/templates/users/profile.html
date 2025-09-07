@@ -25,6 +25,7 @@
       {% endif %}
       {% if viewer == profile_user %}
         <a href="{% url 'edit_profile' %}" class="edit-btn">Editar perfil</a>
+        <a href="{% url 'delete_profile' %}" class="delete-btn">Eliminar perfil</a>
       {% endif %}
     </div>
   </div>

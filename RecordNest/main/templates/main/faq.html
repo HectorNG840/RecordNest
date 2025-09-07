@@ -1,0 +1,63 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Preguntas Frecuentes | RecordNest{% endblock %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/faq.css' %}">
+<div class="faq-container">
+    <h1>Preguntas Frecuentes (FAQ)</h1>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Qué es RecordNest?</h2>
+        <p>RecordNest es una plataforma diseñada para que puedas organizar, explorar y gestionar tu colección de discos. Utilizando las APIs de Discogs y Deezer, puedes agregar discos a tu colección, ver detalles, y escuchar avances de canciones directamente desde Deezer.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Cómo puedo agregar un disco a mi colección?</h2>
+        <p>Para agregar un disco a tu colección, simplemente busca el disco en la aplicación utilizando su título o artista. Luego, selecciona el disco y haz clic en el botón "Añadir a mi colección". Si el disco no está disponible, puedes agregarlo manualmente.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Puedo agregar discos de diferentes formatos?</h2>
+        <p>Sí, puedes agregar discos de cualquier formato disponible. Nuestro sistema es compatible con CD, vinilos, y archivos digitales. Si el formato que buscas no aparece, no dudes en añadirlo manualmente.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Cómo puedo ver el tracklist de un disco?</h2>
+        <p>El tracklist de cada disco está disponible en la página de detalles del disco. Si el disco tiene una lista de pistas, se mostrará debajo de la información general del disco, donde podrás ver el nombre de las canciones, su duración y, si está disponible, un enlace para escuchar un avance a través de Deezer.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Puedo agregar un disco a mi wishlist?</h2>
+        <p>¡Sí! Puedes agregar discos a tu wishlist para hacer un seguimiento de los discos que te gustaría tener en tu colección en el futuro. Simplemente busca el disco y haz clic en el botón "Añadir a la wishlist".</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Cómo puedo eliminar un disco de mi colección o wishlist?</h2>
+        <p>Para eliminar un disco de tu colección o wishlist, ve a la página de detalles del disco y selecciona la opción para eliminarlo. También puedes gestionar tus discos en tu perfil, donde verás una lista de todos los discos que has añadido.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Puedo ver las versiones de un disco?</h2>
+        <p>Sí, en la página de detalles del disco, si existen diferentes versiones del mismo, podrás ver las opciones disponibles, como el país de origen, el formato, el año y más.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Cómo puedo escuchar avances de las canciones?</h2>
+        <p>Si el disco tiene previews disponibles, podrás escuchar un avance de cada pista desde la sección de "Tracklist". Solo tienes que hacer clic en el ícono de reproducción para escuchar el avance a través de Deezer.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Puedo añadir etiquetas a mis discos?</h2>
+        <p>Sí, puedes añadir etiquetas a los discos en tu colección para clasificarlos como desees. Puedes crear nuevas etiquetas o elegir entre las etiquetas existentes.</p>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-question">¿Cómo puedo contactar al soporte?</h2>
+        <p>Si necesitas ayuda o tienes alguna pregunta, puedes contactar al soporte mediante el correo electrónico <a href="mailto:support@recordnest.com">support@recordnest.com</a>. Estaremos encantados de ayudarte.</p>
+    </div>
+</div>
+
+
+{% endblock %}
