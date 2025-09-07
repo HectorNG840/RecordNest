@@ -19,7 +19,7 @@
         <div class="record-card">
             <img src="{{ record.cover_image|default:'/static/images/placeholder-image.png' }}" alt="{{ record.title }}">
             <h3>{{ record.title }}</h3>
-            <p><strong>Artista:</strong> {{ record.artists }}</p>
+            <p><strong>Artista:</strong> {{ record.artists|default:"Sin artista" }}</p>
             <p><strong>Total:</strong> {{ record.total }}</p>
             {% if list_type == 'added' %}
             <a href="{% url 'record_detail' %}?master_id={{ record.id }}" class="cta-button-small">Ver detalle</a>

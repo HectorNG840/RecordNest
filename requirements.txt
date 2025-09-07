@@ -1,4 +1,4 @@
-Django
+Django==5.1.5
 pytest-django
 Pillow
 discog-client

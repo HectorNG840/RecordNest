@@ -15,10 +15,10 @@
           <div class="image-container" style="background-image: url('{{ record.cover_image|default:"/static/images/placeholder-image.png" }}');"></div>
           <div class="card-body">
               <h3 class="card-title">{{ record.title }}</h3>
-              <p><strong>Artista:</strong> {{ record.artists.all|join:", " }}</p>
+              <p><strong>Artista:</strong> {{ record.artists|join:", " }}</p>
               <p><strong>Año:</strong> {{ record.year }}</p>
-              <p><strong>Géneros:</strong> {{ record.genres }}</p>
-              <p><strong>Formato:</strong> {{ record.formats }}</p>
+              <p><strong>Géneros:</strong> {{ record.genres|join:", " }}</p>
+              <p><strong>Formato:</strong> {{ record.formats|join:", " }}</p>
           </div>
       </a>
       <div class="card-options">

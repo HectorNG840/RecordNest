@@ -119,12 +119,23 @@ def top_records(request):
     list_type = request.GET.get('type', 'wished')
 
     if list_type == 'added':
-        records = (
+        top_records_qs = (
             UserRecord.objects
-            .values('title', 'artists', 'cover_image')
             .annotate(total=Count('id'))
             .order_by('-total')[:10]
         )
+
+        records = []
+        for record in top_records_qs:
+            artists_names = ', '.join([a.name for a in record.artists.all()]) or 'Desconocido'
+            records.append({
+                'id': record.id,
+                'title': record.title,
+                'artists': artists_names,
+                'cover_image': record.cover_image or '/static/images/placeholder-image.png',
+                'total': record.total
+            })
+
         title = "Top 10 Discos más añadidos a las colecciones"
 
     else:
