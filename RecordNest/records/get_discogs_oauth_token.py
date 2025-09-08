@@ -1,11 +1,20 @@
+import os
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "RecordNest.settings")
+django.setup()
+
+from django.conf import settings
 from requests_oauthlib import OAuth1Session
 
 REQUEST_TOKEN_URL = 'https://api.discogs.com/oauth/request_token'
 AUTHORIZE_URL = 'https://www.discogs.com/oauth/authorize'
 ACCESS_TOKEN_URL = 'https://api.discogs.com/oauth/access_token'
 
-CONSUMER_KEY = 'RGqvUKwokTQuBwTPXLHE'
-CONSUMER_SECRET = 'AtLdLqCHnURhKdnnPxxsvEOvhfPGpTUj'
+CONSUMER_KEY = settings.DISCOGS_CONSUMER_KEY
+CONSUMER_SECRET = settings.DISCOGS_CONSUMER_SECRET
+
+
 CALLBACK_URL = 'http://localhost/callback'
 
 oauth = OAuth1Session(CONSUMER_KEY, client_secret=CONSUMER_SECRET, callback_uri=CALLBACK_URL)
