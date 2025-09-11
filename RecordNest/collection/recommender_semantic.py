@@ -144,7 +144,18 @@ def fetch_candidates_from_artists(user_records, limit=400):
         return {}
 
     seen_artists = set()
+    
+    # --- Obtener géneros y estilos de la colección del usuario ---
+    user_genres = set()
+    user_styles = set()
 
+    for r in user_records:
+        if r.genres:
+            user_genres.update(g.strip().lower() for g in r.genres.split(","))
+        if r.styles:
+            user_styles.update(s.strip().lower() for s in r.styles.split(","))
+    
+    # --- Búsqueda por artistas ---
     for r in user_records[:10]:
         for artist in r.artists.all():
             artist_name = artist.name.strip()
@@ -174,9 +185,28 @@ def fetch_candidates_from_artists(user_records, limit=400):
                 rel["reason"] = f"Del mismo artista {artist_name}"
             candidates.extend(releases)
 
+    # --- Búsqueda por géneros y estilos de la colección del usuario ---
+    for genre_or_style in user_genres.union(user_styles):
+        print(f"Buscando por género/estilo: {genre_or_style}")
+        search_url = f"{DISCOGS_API_URL}/database/search"
+        resp = requests.get(search_url, params={
+            "q": genre_or_style,
+            "type": "master",  # Buscar masters, que representan la entrada de álbum
+            "per_page": 25,
+            "page": 1,
+            "key": settings.DISCOGS_CONSUMER_KEY,
+            "secret": settings.DISCOGS_CONSUMER_SECRET,
+        })
+        if resp.status_code == 200:
+            results = resp.json().get("results", [])
+            for res in results:
+                res["reason"] = f"Relacionado con tu género/estilo: {genre_or_style}"
+            candidates.extend(results)
 
+    # --- Búsqueda por géneros populares como respaldo ---
     backups = ["Funk", "Soul", "Electronic", "Jazz", "Pop", "Hip Hop"]
     for backup in random.sample(backups, 2):
+        print(f"Buscando por género popular de respaldo: {backup}")
         resp = requests.get(f"{DISCOGS_API_URL}/database/search", params={
             "type": "master",
             "genre": backup,
@@ -194,6 +224,7 @@ def fetch_candidates_from_artists(user_records, limit=400):
 
     print(f"Total candidatos iniciales: {len(candidates)}")
     return list({str(c.get("id") or c.get("master_id")): c for c in candidates}.values())[:limit]
+
 
 
 def build_reason(details, user_top_genres, user_top_styles, user_artists):
@@ -262,7 +293,7 @@ def recommend_records(user, top_n=20):
     )
 
     # --- Perfil usuario ---
-    texts, weights = [], []
+    texts = []
     favs = []
     try:
         f = FavoriteRecord.objects.get(user=user)
@@ -273,7 +304,6 @@ def recommend_records(user, top_n=20):
 
     for r in user_records:
         texts.append(build_features(r))
-        weights.append(3.0 if r in favs else 1.0)
 
     # --- Top géneros y estilos del usuario ---
     all_genres, all_styles = [], []
@@ -392,7 +422,7 @@ def recommend_records(user, top_n=20):
     diverse_recs = []
     for rec in sorted(recs, key=lambda x: x["similarity"], reverse=True):
         g = rec["genres"].split(",")[0] if rec["genres"] else "Unknown"
-        if genre_counts.get(g, 0) >= 5:
+        if genre_counts.get(g, 0) >= 10:
             continue
         genre_counts[g] = genre_counts.get(g, 0) + 1
         diverse_recs.append(rec)

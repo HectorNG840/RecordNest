@@ -493,7 +493,7 @@ def recommendations(request):
         )
 
     try:
-        recs = recommend_records(user, top_n=10)
+        recs = recommend_records(user, top_n=14)
         return JsonResponse({"recommendations": recs})
     except Exception as e:
         return JsonResponse(
@@ -503,7 +503,7 @@ def recommendations(request):
     
 @login_required
 def recommendations_api(request):
-    limit = int(request.GET.get("limit", 12))
+    limit = int(request.GET.get("limit", 14))
     user = request.user
     recs = recommend_records(user, top_n=limit)
 
