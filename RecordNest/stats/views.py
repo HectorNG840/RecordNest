@@ -8,6 +8,7 @@ from collections import Counter
 from users.models import CustomUser as User
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
 
 def most_added_records(request):
     most_added_qs = (
@@ -175,122 +176,116 @@ def top_records(request):
     return render(request, 'stats/top_records.html', context)
 
 
+
 @login_required
 def statistics(request):
     user = request.user
     now = datetime.now()
 
-    # Estadísticas personales
+    # 🔹 Leer filtros desde GET
+    start_date_str = request.GET.get("start_date")  # antes era start_month
+    end_date_str = request.GET.get("end_date")      # antes era end_month
 
-    total_added = UserRecord.objects.filter(user=user).count()
+    start_date = None
+    end_date = None
+
+    if start_date_str:
+        # convertir string YYYY-MM-DD a datetime
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+    # 🔹 Query base
+    user_records_qs = UserRecord.objects.filter(user=user)
+    all_records_qs = UserRecord.objects.all()
+
+    # 🔹 Aplicar filtro de fechas solo en los gráficos
+    user_records_filtered = user_records_qs
+    all_records_filtered = all_records_qs
+
+    if start_date:
+        user_records_filtered = user_records_filtered.filter(added_at__date__gte=start_date)
+        all_records_filtered = all_records_filtered.filter(added_at__date__gte=start_date)
+    if end_date:
+        user_records_filtered = user_records_filtered.filter(added_at__date__lte=end_date)
+        all_records_filtered = all_records_filtered.filter(added_at__date__lte=end_date)
+
+    # === Estadísticas personales (no se filtran) ===
+    total_added = user_records_qs.count()
     total_wished = Wishlist.objects.filter(user=user).count()
 
-    # Discos añadidos por mes/año
+    yearly_added = user_records_qs.filter(added_at__year=now.year).count()
+
+    # === Gráficos ===
+
+    # 1️⃣ Discos añadidos por mes del usuario
     records_per_month_qs = (
-        UserRecord.objects
-        .filter(user=user)
+        user_records_filtered
         .values('added_at__year', 'added_at__month')
         .annotate(count=Count('id'))
         .order_by('added_at__year', 'added_at__month')
     )
+    monthly_labels = [f"{r['added_at__year']}-{r['added_at__month']:02d}" for r in records_per_month_qs]
+    monthly_values = [r['count'] for r in records_per_month_qs]
 
-    monthly_labels = []
-    monthly_values = []
-    for r in records_per_month_qs:
-        year = r['added_at__year']
-        month = r['added_at__month']
-        monthly_labels.append(f"{year}-{month:02d}")
-        monthly_values.append(r['count'])
+    # 2️⃣ Discos añadidos por mes global
+    global_records_per_month_qs = (
+        all_records_filtered
+        .values('added_at__year', 'added_at__month')
+        .annotate(count=Count('id'))
+        .order_by('added_at__year', 'added_at__month')
+    )
+    global_monthly_labels = [f"{r['added_at__year']}-{r['added_at__month']:02d}" for r in global_records_per_month_qs]
+    global_monthly_values = [r['count'] for r in global_records_per_month_qs]
 
-    yearly_added = sum([r['count'] for r in records_per_month_qs if r['added_at__year'] == now.year])
-
-    # Estadísticas generales
-    total_users = User.objects.count()
-    total_records = UserRecord.objects.count()
-    total_wishes = Wishlist.objects.count()
-
-    # Estilos más frecuentes del usuario
-    user_records = UserRecord.objects.filter(user=user)
+    # 3️⃣ Estilos del usuario filtrados
     style_list = []
-    for r in user_records:
+    for r in user_records_filtered:
         if r.styles:
             style_list.extend([g.strip() for g in r.styles.split(',')])
-
     style_counts = Counter(style_list)
     user_styles = [{'name': g, 'count': c} for g, c in style_counts.most_common(5)]
     user_styles_labels = [x['name'] for x in user_styles]
     user_styles_values = [x['count'] for x in user_styles]
 
-    # Comparación global de estilos
-
-    all_records = UserRecord.objects.all()
+    # 4️⃣ Estilos globales filtrados
     global_styles_list = []
-    for r in all_records:
+    for r in all_records_filtered:
         if r.styles:
             global_styles_list.extend([g.strip() for g in r.styles.split(',')])
-
     global_style_counts = Counter(global_styles_list)
     global_styles = [{'name': g, 'count': c} for g, c in global_style_counts.most_common(5)]
     global_styles_labels = [x['name'] for x in global_styles]
     global_styles_values = [x['count'] for x in global_styles]
 
-    # Discos añadidos globalmente por mes/año
-    global_records_per_month_qs = (
-        UserRecord.objects
-        .values('added_at__year', 'added_at__month')
-        .annotate(count=Count('id'))
-        .order_by('added_at__year', 'added_at__month')
-    )
-
-    global_monthly_labels = []
-    global_monthly_values = []
-    for r in global_records_per_month_qs:
-        year = r['added_at__year']
-        month = r['added_at__month']
-        global_monthly_labels.append(f"{year}-{month:02d}")
-        global_monthly_values.append(r['count'])
-
-    # Artistas más frecuentes globales
-
+    # 5️⃣ Artistas globales filtrados
     global_artist_list = []
-    for r in all_records:
+    for r in all_records_filtered:
         global_artist_list.extend([a.name for a in r.artists.all()])
-
     global_artist_counts = Counter(global_artist_list)
     global_top_artists = [{'name': a, 'count': c} for a, c in global_artist_counts.most_common(5)]
     global_artist_labels = [x['name'] for x in global_top_artists]
     global_artist_values = [x['count'] for x in global_top_artists]
 
-    # Top discos añadidos
-
-    top_added_records = (
-        UserRecord.objects
-        .values('title', 'artists', 'cover_image')
-        .annotate(total=Count('id'))
-        .order_by('-total')[:10]
-    )
-    # Artistas más frecuentes del usuario
-
+    # 6️⃣ Artistas del usuario filtrados
     artist_list = []
-    for r in user_records:
+    for r in user_records_filtered:
         artist_list.extend([a.name for a in r.artists.all()])
-
     artist_counts = Counter(artist_list)
     top_artists = [{'name': a, 'count': c} for a, c in artist_counts.most_common(5)]
     artist_labels = [x['name'] for x in top_artists]
     artist_values = [x['count'] for x in top_artists]
 
     # Contexto final
-
     context = {
         'total_added': total_added,
         'total_wished': total_wished,
         'monthly_labels': monthly_labels,
         'monthly_values': monthly_values,
         'yearly_added': yearly_added,
-        'total_users': total_users,
-        'total_records': total_records,
-        'total_wishes': total_wishes,
+        'total_users': User.objects.count(),
+        'total_records': all_records_qs.count(),
+        'total_wishes': Wishlist.objects.count(),
         'user_styles_labels': user_styles_labels,
         'user_styles_values': user_styles_values,
         'global_styles_labels': global_styles_labels,
@@ -299,10 +294,12 @@ def statistics(request):
         'global_monthly_values': global_monthly_values,
         'global_artist_labels': global_artist_labels,
         'global_artist_values': global_artist_values,
-        'top_added_records': top_added_records,
         'artist_labels': artist_labels,
         'artist_values': artist_values,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
     }
 
     return render(request, 'stats/statistics.html', context)
+
 

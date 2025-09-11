@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 
 <div class="dashboard">
@@ -46,6 +48,19 @@
             <p>{{ total_records }}</p>
         </div>
     </section>
+
+<div class="filter-section">
+        <form method="get">
+            <label for="start_date">Fecha inicio:</label>
+            <input type="date" name="start_date" id="start_date" value="{{ start_date|default_if_none:'' }}">
+
+            <label for="end_date">Fecha fin:</label>
+            <input type="date" name="end_date" id="end_date" value="{{ end_date|default_if_none:'' }}">
+
+            <button type="submit" class="btn-toggle">Filtrar</button>
+            <a href="{% url 'statistics' %}" class="btn-toggle remove-filter">Quitar filtro</a>
+        </form>
+    </div>
 
     <!-- ======= Gráficos principales ======= -->
     <section class="charts-grid">
@@ -104,6 +119,50 @@
 }
 .btn-toggle:hover {
     background-color: #1dd1a1;
+}
+.filter-section {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.filter-section form {
+    display: inline-flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.filter-section label {
+    color: #fff;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#start_date, #end_date {
+    background-color: transparent;
+    border: 2px solid #48dbfb;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    width: 200px;
+    font-size: 14px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+#start_date:focus, #end_date:focus {
+    outline: none;
+    border-color: #1dd1a1;
+    background-color: #2d2d2d;
+}
+.remove-filter {
+    text-decoration: none;   /* Quita el subrayado */
+    color: #fff; 
+    background-color: #ff6b6b; /* Mantener color legible sobre el fondo rojo */
+}
+
+.remove-filter:hover {
+    text-decoration: none;   /* No subrayar al pasar el ratón */
+    opacity: 0.9;            /* Un efecto visual suave */
 }
 </style>
 
@@ -300,6 +359,20 @@
         userGenreChart.update();
         userArtistsChart.update();
     });
+/// Selector de fecha
+document.addEventListener("DOMContentLoaded", function() {
+    flatpickr("#start_month", {
+        dateFormat: "Y-m", // Formato año-mes
+        minDate: "1900-01", // Fecha mínima
+        maxDate: "2100-12"  // Fecha máxima
+    });
+    flatpickr("#end_month", {
+        dateFormat: "Y-m", // Formato año-mes
+        minDate: "1900-01", // Fecha mínima
+        maxDate: "2100-12"  // Fecha máxima
+    });
+});
+
 </script>
 
 
