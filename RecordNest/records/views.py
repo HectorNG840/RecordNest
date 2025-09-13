@@ -20,25 +20,9 @@ from collection.models import UserRecord
 import time
 import requests
 from discogs_client.exceptions import HTTPError
+from collection.recommender_semantic import recommend_records
+from .utils import get_oauth_session, get_discogs_client
 
-
-def get_oauth_session():
-    return OAuth1Session(
-        settings.DISCOGS_CONSUMER_KEY,
-        client_secret=settings.DISCOGS_CONSUMER_SECRET,
-        resource_owner_key=settings.DISCOGS_OAUTH_TOKEN,
-        resource_owner_secret=settings.DISCOGS_OAUTH_SECRET
-    )
-
-
-def get_discogs_client():
-    return discogs_client.Client(
-        'RecordNest/1.0',
-        consumer_key=settings.DISCOGS_CONSUMER_KEY,
-        consumer_secret=settings.DISCOGS_CONSUMER_SECRET,
-        token=settings.DISCOGS_OAUTH_TOKEN,
-        secret=settings.DISCOGS_OAUTH_SECRET
-    )
 
 def search_discogs(query, page=1):
     session = get_oauth_session()
@@ -306,10 +290,14 @@ def record_detail(request):
 
         # Wishlist
         is_in_wishlist = False
-        print(f"artist_ids: {artist_ids}")
         if request.user.is_authenticated:
-            is_in_wishlist = Wishlist.objects.filter(user=request.user, discogs_master_id=master_id).exists() or \
-                             Wishlist.objects.filter(user=request.user, discogs_release_id=release_id).exists()
+            wishlist_qs = Wishlist.objects.filter(user=request.user)
+            
+            if master_id:
+                is_in_wishlist = wishlist_qs.filter(discogs_master_id=str(master_id)).exists()
+            
+            if not is_in_wishlist and release_id:
+                is_in_wishlist = wishlist_qs.filter(discogs_release_id=str(release_id)).exists()
 
         return render(request, 'records/record_detail.html', {
             'record': record,
@@ -397,3 +385,70 @@ def load_versions(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+def get_popular_discogs_records(limit=12, max_workers=5):
+    session = get_oauth_session()
+    url = "https://api.discogs.com/database/search"
+    params = {
+        "type": "master",
+        "sort": "have",
+        "sort_order": "desc",
+        "per_page": limit,
+        "page": 1
+    }
+
+    try:
+        response = session.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        results = data.get("results", [])
+
+        def fetch_details(r):
+            master_id = r.get("master_id")
+            title = r.get("title", "Desconocido")
+
+            # Parse inicial rápido
+            if " - " in title:
+                artist_name, record_title = title.split(" - ", 1)
+            else:
+                artist_name, record_title = "Desconocido", title
+
+            record = {
+                "title": record_title.strip(),
+                "cover_image": r.get("cover_image"),
+                "year": r.get("year", "Desconocido"),
+                "master_id": master_id,
+                "artists": artist_name.strip(),
+            }
+
+            if master_id and record["artists"] in ["Varios", "Desconocido"]:
+                try:
+                    detail_url = f"https://api.discogs.com/masters/{master_id}"
+                    detail = session.get(detail_url).json()
+
+                    if "artists" in detail:
+                        record["artists"] = ", ".join([a.get("name") for a in detail["artists"]])
+                    record["title"] = detail.get("title", record["title"])
+                    record["year"] = detail.get("year", record["year"])
+
+                except Exception as e:
+                    print(f"⚠️ Error en master {master_id}: {e}")
+
+            return record
+
+        processed_results = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(fetch_details, r) for r in results]
+            for future in as_completed(futures):
+                processed_results.append(future.result())
+
+        return processed_results
+
+    except Exception as e:
+        print(f"❌ Error obteniendo populares: {e}")
+        return []
+
+
+
+

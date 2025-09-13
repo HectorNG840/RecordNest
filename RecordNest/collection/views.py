@@ -1,9 +1,10 @@
+from django.utils import timezone
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .forms import RecordListForm
-from .models import UserRecord, Track, Tag, RecordList, Wishlist, ExcludedRecommendation, Artist
+from .models import UserRecord, Track, Tag, RecordList, Wishlist, ExcludedRecommendation, Artist, CachedRecommendation
 import json
 import requests
 from django.http import JsonResponse
@@ -15,17 +16,10 @@ import discogs_client
 from django.conf import settings
 from discogs_client.exceptions import HTTPError
 from .recommender_semantic import recommend_records
-from records.views import get_oauth_session, track_position_key
+from records.views import track_position_key
+from records.utils import get_oauth_session, get_discogs_client
 from collections import Counter
 
-def get_discogs_client():
-    return discogs_client.Client(
-        'RecordNest/1.0',
-        consumer_key=settings.DISCOGS_CONSUMER_KEY,
-        consumer_secret=settings.DISCOGS_CONSUMER_SECRET,
-        token=settings.DISCOGS_OAUTH_TOKEN,
-        secret=settings.DISCOGS_OAUTH_SECRET
-    )
 
 @login_required
 def add_to_collection(request):
@@ -493,19 +487,40 @@ def recommendations(request):
         )
 
     try:
-        recs = recommend_records(user, top_n=14)
+        cache = getattr(user, "cached_recommendations", None)
+
+        if cache and cache.data:
+            recs = cache.data
+        else:
+            recs = recommend_records(user, top_n=14)
+            CachedRecommendation.objects.update_or_create(
+                user=user,
+                defaults={"data": recs, "updated_at": timezone.now()}
+            )
+
         return JsonResponse({"recommendations": recs})
     except Exception as e:
         return JsonResponse(
             {"error": f"Ocurrió un error en el sistema de recomendaciones: {str(e)}"},
             status=500
         )
-    
+
+
 @login_required
 def recommendations_api(request):
     limit = int(request.GET.get("limit", 14))
     user = request.user
-    recs = recommend_records(user, top_n=limit)
+
+    cache = getattr(user, "cached_recommendations", None)
+
+    if cache and cache.data:
+        recs = cache.data[:limit]
+    else:
+        recs = recommend_records(user, top_n=limit)
+        CachedRecommendation.objects.update_or_create(
+            user=user,
+            defaults={"data": recs, "updated_at": timezone.now()}
+        )
 
     return JsonResponse({"recommendations": recs})
     
