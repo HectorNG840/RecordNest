@@ -3,7 +3,7 @@ from django.shortcuts import render
 from collection.models import UserRecord, Wishlist
 from django.utils import timezone
 from datetime import datetime, timedelta
-from records.views import get_discogs_client
+from records.utils import get_discogs_client
 from collections import Counter
 from users.models import CustomUser as User
 from concurrent.futures import ThreadPoolExecutor, as_completed

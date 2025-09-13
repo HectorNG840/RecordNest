@@ -7,7 +7,7 @@ from django.conf import settings
 from sentence_transformers import SentenceTransformer, util
 from sklearn.preprocessing import MinMaxScaler
 from collection.models import UserRecord, FavoriteRecord, Wishlist, CachedMaster, ExcludedRecommendation, CachedRelease, CachedMaster, UserProfileEmbedding
-from records.views import get_oauth_session
+from records.utils import get_oauth_session
 import torch
 from concurrent.futures import ThreadPoolExecutor
 import logging
@@ -143,55 +143,70 @@ def fetch_candidates_from_artists(user_records, limit=400):
             print(f"⚠️ Error en _safe_get: {e}")
         return {}
 
-    seen_artists = set()
-    
-    # --- Obtener géneros y estilos de la colección del usuario ---
-    user_genres = set()
-    user_styles = set()
+    artist_counter = Counter(
+        artist.name.strip()
+        for r in user_records
+        for artist in r.artists.all()
+        if artist.name.strip()
+    )
+    all_artists = [a for a, _ in artist_counter.most_common(30)]
+    selected_artists = random.sample(all_artists, min(len(all_artists), 10))
 
+
+    all_genres, all_styles = [], []
     for r in user_records:
         if r.genres:
-            user_genres.update(g.strip().lower() for g in r.genres.split(","))
+            all_genres.extend([g.strip().lower() for g in r.genres.split(",")])
         if r.styles:
-            user_styles.update(s.strip().lower() for s in r.styles.split(","))
-    
+            all_styles.extend([s.strip().lower() for s in r.styles.split(",")])
+
+
+    top_genres = [g for g, _ in Counter(all_genres).most_common(5)]
+    top_styles = [s for s, _ in Counter(all_styles).most_common(5)]
+    selected_tags = set(top_genres + top_styles)
+
+    seen_artists = set()
+    seen_tags = set()
+
     # --- Búsqueda por artistas ---
-    for r in user_records[:10]:
-        for artist in r.artists.all():
-            artist_name = artist.name.strip()
-            print(f"Buscando artista: {artist_name}")
-            if not artist_name or artist_name in seen_artists:
-                continue
+    for artist_name in selected_artists:
+        if not artist_name or artist_name in seen_artists:
+            continue
 
-            search_url = f"{DISCOGS_API_URL}/database/search"
-            resp = requests.get(search_url, params={
-                "q": artist_name,
-                "per_page": 1,
-                "page": 1,
-                "key": settings.DISCOGS_CONSUMER_KEY,
-                "secret": settings.DISCOGS_CONSUMER_SECRET,
-            })
-            results = resp.json().get("results", []) if resp.status_code == 200 else []
-            if not results:
-                print(f"No encontrado en Discogs: {artist_name}")
-                continue
+        print(f"Buscando artista: {artist_name}")
+        search_url = f"{DISCOGS_API_URL}/database/search"
+        resp = requests.get(search_url, params={
+            "q": artist_name,
+            "per_page": 1,
+            "page": 1,
+            "key": settings.DISCOGS_CONSUMER_KEY,
+            "secret": settings.DISCOGS_CONSUMER_SECRET,
+        })
+        results = resp.json().get("results", []) if resp.status_code == 200 else []
+        if not results:
+            print(f"No encontrado en Discogs: {artist_name}")
+            continue
 
-            artist_id = results[0]["id"]
-            seen_artists.add(artist_name)
+        artist_id = results[0]["id"]
+        seen_artists.add(artist_name)
 
-            releases_url = f"{DISCOGS_API_URL}/artists/{artist_id}/releases?per_page=50&page=1"
-            releases = _safe_get(releases_url).get("releases", [])
-            for rel in releases:
-                rel["reason"] = f"Del mismo artista {artist_name}"
-            candidates.extend(releases)
+        releases_url = f"{DISCOGS_API_URL}/artists/{artist_id}/releases?per_page=50&page=1"
+        releases = _safe_get(releases_url).get("releases", [])
+        for rel in releases:
+            rel["reason"] = f"Del mismo artista {artist_name}"
+        candidates.extend(releases)
 
-    # --- Búsqueda por géneros y estilos de la colección del usuario ---
-    for genre_or_style in user_genres.union(user_styles):
+    # --- Búsqueda por géneros y estilos (solo top seleccionados) ---
+    for genre_or_style in selected_tags:
+        if genre_or_style in seen_tags:
+            continue
+        seen_tags.add(genre_or_style)
+
         print(f"Buscando por género/estilo: {genre_or_style}")
         search_url = f"{DISCOGS_API_URL}/database/search"
         resp = requests.get(search_url, params={
             "q": genre_or_style,
-            "type": "master",  # Buscar masters, que representan la entrada de álbum
+            "type": "master",
             "per_page": 25,
             "page": 1,
             "key": settings.DISCOGS_CONSUMER_KEY,
@@ -203,27 +218,35 @@ def fetch_candidates_from_artists(user_records, limit=400):
                 res["reason"] = f"Relacionado con tu género/estilo: {genre_or_style}"
             candidates.extend(results)
 
-    # --- Búsqueda por géneros populares como respaldo ---
-    backups = ["Funk", "Soul", "Electronic", "Jazz", "Pop", "Hip Hop"]
-    for backup in random.sample(backups, 2):
-        print(f"Buscando por género popular de respaldo: {backup}")
-        resp = requests.get(f"{DISCOGS_API_URL}/database/search", params={
-            "type": "master",
-            "genre": backup,
-            "sort": "want",
-            "per_page": 25,
-            "page": 1,
-            "key": settings.DISCOGS_CONSUMER_KEY,
-            "secret": settings.DISCOGS_CONSUMER_SECRET,
-        })
-        if resp.status_code == 200:
-            results = resp.json().get("results", [])
-            for res in results:
-                res["reason"] = f"Popular en {backup}"
-            candidates.extend(results)
+    # --- Fallback: géneros populares si no hay suficientes ---
+    if len(candidates) < 50:
+        backups = ["Funk", "Soul", "Electronic", "Jazz", "Pop", "Hip Hop"]
+        for backup in random.sample(backups, 2):
+            print(f"Buscando por género popular de respaldo: {backup}")
+            resp = requests.get(f"{DISCOGS_API_URL}/database/search", params={
+                "type": "master",
+                "genre": backup,
+                "sort": "want",
+                "per_page": 25,
+                "page": 1,
+                "key": settings.DISCOGS_CONSUMER_KEY,
+                "secret": settings.DISCOGS_CONSUMER_SECRET,
+            })
+            if resp.status_code == 200:
+                results = resp.json().get("results", [])
+                for res in results:
+                    res["reason"] = f"Popular en {backup}"
+                candidates.extend(results)
 
     print(f"Total candidatos iniciales: {len(candidates)}")
-    return list({str(c.get("id") or c.get("master_id")): c for c in candidates}.values())[:limit]
+
+    # --- Eliminar duplicados (clave = id/master_id) ---
+    unique_candidates = list({
+        str(c.get("id") or c.get("master_id")): c
+        for c in candidates
+    }.values())
+
+    return unique_candidates[:limit]
 
 
 

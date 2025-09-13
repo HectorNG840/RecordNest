@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
-from records.views import get_oauth_session
+from records.utils import get_oauth_session
 from concurrent.futures import ThreadPoolExecutor
 import re
 from records.deezer_utils import clean_artist_name

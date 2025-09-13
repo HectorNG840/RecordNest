@@ -4,13 +4,74 @@
 {% block title %}RecordNest{% endblock %}
 
 {% block content %}
+
 <section class="hero">
     <div class="hero-content">
         <h1>Bienvenido a RecordNest</h1>
         <p>Tu colección digital de discos, artistas y música favorita en un solo lugar.</p>
-        <a href="{% url 'signup' %}" class="cta-button">Empieza ahora</a>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'signup' %}" class="cta-button">Empieza ahora</a>
+        {% endif %}
     </div>
 </section>
+
+{% if mode == "popular" %}
+<section class="carousel">
+  <h2>Discos populares</h2>
+  <div class="swiper swiper-cards">
+    <div class="swiper-wrapper">
+      {% for record in records %}
+        <div class="swiper-slide">
+            <div class="card record-card">
+              <a href="{% url 'record_detail' %}?{% if record.master_id %}master_id={{ record.master_id }}{% else %}release_id={{ record.release_id }}{% endif %}" class="card-link">
+                <div class="image-container" 
+                    style="background-image: url('{{ record.cover_image|default:'/static/images/placeholder-record.png' }}');">
+                </div>
+                <div class="card-body">
+                  <h3 class="card-title">{{ record.title }}</h3>
+                  <p><strong>Artista:</strong> {{ record.artists }}</p>
+                  <p><strong>Año:</strong> {{ record.year|default:"Desconocido" }}</p>
+                  <!-- Relleno invisible para mantener altura uniforme -->
+                  <p class="reason" style="visibility:hidden">-</p>
+                </div>
+              </a>
+            </div>
+          
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="swiper-button-prev swiper-cards-prev"></div>
+    <div class="swiper-button-next swiper-cards-next"></div>
+  </div>
+</section>
+{% elif mode == "recommendations" %}
+<section class="carousel">
+  <h2>Tus recomendaciones</h2>
+  <div class="swiper swiper-cards">
+    <div class="swiper-wrapper">
+      {% for record in records %}
+        <div class="swiper-slide">
+            <div class="card record-card">
+              <a href="{% url 'record_detail' %}?{% if record.master_id %}master_id={{ record.master_id }}{% else %}release_id={{ record.release_id }}{% endif %}" class="card-link">
+                <div class="image-container" style="background-image: url('{{ record.cover_image|default:'/static/images/placeholder-record.png' }}');"></div>
+                <div class="card-body">
+                  <h3 class="card-title">{{ record.title }}</h3>
+                  <p><strong>Artista:</strong> {{ record.artists }}</p>
+                  <p><strong>Año:</strong> {{ record.year|default:"Desconocido" }}</p>
+                  <p class="reason"><em>{{ record.reason }}</em></p>
+                </div>
+              </a>
+            </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="swiper-button-prev swiper-cards-prev"></div>
+    <div class="swiper-button-next swiper-cards-next"></div>
+  </div>
+</section>
+{% endif %}
 
 <section class="features">
     <div class="feature">
@@ -29,4 +90,29 @@
         <p>Regístrate y guarda tus preferencias, colecciones y artistas seguidos.</p>
     </div>
 </section>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  new Swiper('.swiper-cards', {
+    slidesPerView: 4,
+    spaceBetween: 25,
+    loop: true,
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+    navigation: {
+      nextEl: '.swiper-cards-next',
+      prevEl: '.swiper-cards-prev',
+    },
+    breakpoints: {
+      320: { slidesPerView: 1 },
+      640: { slidesPerView: 2 },
+      1024: { slidesPerView: 3 },
+      1440: { slidesPerView: 4 }
+    }
+  });
+</script>
+
 {% endblock %}

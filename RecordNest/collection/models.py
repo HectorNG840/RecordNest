@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import CustomUser as User
+from django.utils import timezone
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
@@ -106,5 +107,13 @@ class UserProfileEmbedding(models.Model):
 
     def __str__(self):
         return f"Perfil embedding de {self.user.username}"
+    
+class CachedRecommendation(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cached_recommendations")
+    data = models.JSONField(default=list)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Recs for {self.user.username} ({self.updated_at})"
 
 
