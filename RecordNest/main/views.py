@@ -24,7 +24,6 @@ def home(request):
         mode = "recommendations"
         records = recs
     else:
-        from records.views import get_popular_discogs_records
         mode = "popular"
         records = get_popular_discogs_records(limit=12)
 
