@@ -32,6 +32,7 @@ RecordNest permite a los usuarios gestionar su colección de discos, buscar info
 
 ## Dependencias principales
 - Django==5.1.5 — Framework web principal.
+- pytest — Testing.
 - pytest-django — Testing.
 - Pillow — Manejo de imágenes.
 - discog-client — Cliente para la API de Discogs.
@@ -128,6 +129,14 @@ python manage.py runserver
 
 Aqui se muestran unas capturas de pantalla donde se ve el uso básico de la aplicación.
 
+1. Home sin loguear
+
+   ![Home sin loguear](https://iili.io/KuMvRG2.png)
+
+2. Home logueado
+
+   ![Home logueado](https://iili.io/KuMgmbe.png)
+
 1. Creación de usuario  
 
    ![Creación de usuario](https://iili.io/KoG9IeV.png)
@@ -154,7 +163,7 @@ Aqui se muestran unas capturas de pantalla donde se ve el uso básico de la apli
 
 8. Estadisticas generales  
 
-  ![Estadísticas generales](https://iili.io/KoGA0Vn.jpg)
+  ![Estadísticas generales](https://iili.io/KuMPIqb.jpg)
 
 9. Top discos 
 
