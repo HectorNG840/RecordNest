@@ -2,7 +2,6 @@ from urllib.parse import unquote
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.core.cache import cache
-from .models import Record
 import hashlib
 import discogs_client
 import json

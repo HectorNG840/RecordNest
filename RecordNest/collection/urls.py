@@ -24,6 +24,7 @@ path('add_to_wishlist/<str:discogs_id>/', views.add_to_wishlist, name='add_to_wi
 path('remove_from_wishlist/<int:wishlist_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
 path('wishlist/', views.user_wishlist, name='user_wishlist'),
 path("recommendations/", views.recommendations_page, name="recommendations_page"),
+path("recommendations/json/", views.recommendations, name="recommendations"),
 path("recommendations/exclude/<str:master_id>/", views.exclude_recommendation, name="exclude_recommendation"),
 path("api/recommendations/", views.recommendations_api, name="recommendations_api"),
 

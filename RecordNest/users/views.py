@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 import base64
 from django.core.files.base import ContentFile
-from records.models import Record
 from collection.models import UserRecord, FavoriteRecord, RecordList
 from django.db.models import Q
 
