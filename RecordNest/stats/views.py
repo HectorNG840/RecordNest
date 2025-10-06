@@ -183,8 +183,8 @@ def statistics(request):
     now = datetime.now()
 
     # 🔹 Leer filtros desde GET
-    start_date_str = request.GET.get("start_date")  # antes era start_month
-    end_date_str = request.GET.get("end_date")      # antes era end_month
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
 
     start_date = None
     end_date = None

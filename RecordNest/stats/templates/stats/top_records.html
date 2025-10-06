@@ -35,14 +35,36 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ================= MOCKUP: gráfico de popularidad =================
+const USE_MOCK_POPULARITY = true;
+
+// Genera un ranking decreciente pero con ruido (máximo ~50)
+function generateMockData(n, max = 50) {
+    const data = [];
+    let current = max;
+    for (let i = 0; i < n; i++) {
+        // Reducción progresiva con variación aleatoria
+        current -= Math.floor(Math.random() * 5 + 2); 
+        if (current < 5) current = Math.floor(Math.random() * 5 + 3); 
+        data.push(current);
+    }
+    return data;
+}
+
+const labels = [{% for record in records %}"{{ record.title|escapejs }} ({{ record.artists|escapejs }})"{% if not forloop.last %},{% endif %}{% endfor %}];
+const realData = [{% for record in records %}{{ record.total }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+// Si usamos mock, generamos con variación
+const dataForChart = USE_MOCK_POPULARITY ? generateMockData(labels.length, 50) : realData;
+
 const ctx = document.getElementById('recordsChart').getContext('2d');
 const recordsChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: [{% for record in records %}"{{ record.title|escapejs }} ({{ record.artists|escapejs }})",{% endfor %}],
+        labels,
         datasets: [{
-            label: 'Cantidad',
-            data: [{% for record in records %}{{ record.total }},{% endfor %}],
+            label: USE_MOCK_POPULARITY ? 'Cantidad (mock)' : 'Cantidad',
+            data: dataForChart,
             backgroundColor: 'rgba(174, 214, 178, 0.8)',
             borderColor: 'rgba(174, 214, 178, 1)',
             borderWidth: 1,
@@ -53,10 +75,19 @@ const recordsChart = new Chart(ctx, {
         responsive: true,
         plugins: {
             legend: { display: false },
+            title: {
+                display: true,
+                text: USE_MOCK_POPULARITY
+                      ? 'Visualización de popularidad (datos simulados)'
+                      : 'Visualización de popularidad'
+            },
             tooltip: {
                 backgroundColor: '#252321',
                 titleColor: '#aed6b2',
-                bodyColor: '#fff'
+                bodyColor: '#fff',
+                callbacks: {
+                    afterTitle: () => USE_MOCK_POPULARITY ? 'Valores generados en cliente' : ''
+                }
             }
         },
         scales: {
@@ -73,4 +104,6 @@ const recordsChart = new Chart(ctx, {
     }
 });
 </script>
+
+
 {% endblock %}

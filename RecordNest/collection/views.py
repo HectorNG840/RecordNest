@@ -367,7 +367,6 @@ def add_to_wishlist(request, discogs_id):
                 
 
                 try:
-                    master = d.master(discogs_id)
                     print(f"Disco {discogs_id} es un master. Guardando en master_id.")
                     Wishlist.objects.create(user=request.user, discogs_master_id=discogs_id)
                     return redirect('user_wishlist')
