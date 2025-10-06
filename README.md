@@ -31,15 +31,16 @@ RecordNest permite a los usuarios gestionar su colección de discos, buscar info
 - SQLite
 
 ## Dependencias principales
-- Django==5.1.5 — Framework web principal.
-- pytest — Testing.
-- pytest-django — Testing.
-- Pillow — Manejo de imágenes.
-- discog-client — Cliente para la API de Discogs.
-- python-decouple — Gestión de variables de entorno y configuración.
-- bbcode — Renderizado de BBCode.
-- scikit-learn — Algoritmos de machine learning.
-- sentence-transformers — Modelos semánticos para el recomendador.
+- Django==5.1.5 - Framework web principal.
+- pytest - Testing.
+- pytest-django - Testing.
+- Pillow - Manejo de imágenes.
+- discogs-client - Cliente para la API de Discogs.
+- python-decouple - Gestión de variables de entorno y configuración.
+- bbcode - Renderizado de BBCode.
+- scikit-learn - Algoritmos de machine learning.
+- sentence-transformers - Modelos semánticos para el recomendador.
+- requests_oauthlib - Autenticación con OAuth
 
 ## Instalación
 1. Clona este repositorio:
@@ -57,15 +58,6 @@ RecordNest permite a los usuarios gestionar su colección de discos, buscar info
    ```bash
    pip install -r requirements.txt
    ```
-4. Realiza y aplica las migraciones:
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
-5. Ejecuta el servidor de desarrollo
-   ```bash
-   python manage.py runserver
-   ```   
 
 ## Configuración de credenciales
 
@@ -119,8 +111,13 @@ DEFAULT_FROM_EMAIL="RecordNest <tu_correo@gmail.com>"
 ```
 Recomendado: usar un App Password de Google.
 
-### 5) Reinicia el servidor
-Después de actualizar el .env, reinicia el servidor de desarrollo:
+### 5) Realizar y aplicar las migraciones
+ ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+ ```
+### 6) Ejecutar el servidor de desarrollo
+Para que funcione la aplicación, se tiene que ejecutar el servidor mediante el siguiente comando:
 ```bash
 python manage.py runserver
 ```
