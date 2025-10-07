@@ -74,7 +74,18 @@ Copy-Item .env.example .env
 ```
 No subas .env al repositorio. Mantén tus credenciales en local.
 
-### 2) Claves de Discogs (consumer key/secret)
+### 2) Clave secreta Django (Secret_Key)
+
+#### 1. En la terminal pon el siguiente comando.
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+#### 3. Copia la Secret Key generada en el .env:
+```bash
+SECRET_KEY=tu_secret_key
+```
+
+### 3) Claves de Discogs (consumer key/secret)
 
 #### 1. Ve a Discogs Developers y crea una [aplicación](https://www.discogs.com/settings/developers) (sección Developers de tu cuenta).
 #### 2. Configura el Callback URL exactamente igual que en tu .env (por defecto):
@@ -86,7 +97,7 @@ DISCOGS_CALLBACK_URL=http://127.0.0.1:8000/discogs/callback/
 DISCOGS_CONSUMER_KEY=tu_consumer_key
 DISCOGS_CONSUMER_SECRET=tu_consumer_secret
 ```
-### 3) Obtener Access Token/Secret de Discogs (OAuth)
+### 4) Obtener Access Token/Secret de Discogs (OAuth)
 
 Con el entorno virtual activo y desde la raíz del proyecto (donde está manage.py), ejecuta el script:
 ```bash
@@ -102,7 +113,7 @@ DISCOGS_OAUTH_TOKEN=tu_access_token
 DISCOGS_OAUTH_SECRET=tu_access_secret
 ```
 
-### 4) Email (Gmail)
+### 5) Email (Gmail)
 Para enviar correos con Gmail:
 ```bash
 EMAIL_HOST_USER=tu_correo@gmail.com
@@ -111,12 +122,12 @@ DEFAULT_FROM_EMAIL="RecordNest <tu_correo@gmail.com>"
 ```
 Recomendado: usar un App Password de Google.
 
-### 5) Realizar y aplicar las migraciones
+### 6) Realizar y aplicar las migraciones
  ```bash
    python manage.py makemigrations
    python manage.py migrate
  ```
-### 6) Ejecutar el servidor de desarrollo
+### 7) Ejecutar el servidor de desarrollo
 Para que funcione la aplicación, se tiene que ejecutar el servidor mediante el siguiente comando:
 ```bash
 python manage.py runserver
